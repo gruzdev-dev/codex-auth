@@ -9,8 +9,8 @@ import (
 	"codex-auth/core/ports"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type UserRepo struct {
@@ -26,7 +26,7 @@ func NewUserRepo(pool *pgxpool.Pool) ports.UserRepository {
 func (r *UserRepo) Save(ctx context.Context, user *domain.User) error {
 	query := `INSERT INTO users (id, email, password_hash, role, created_at) VALUES ($1, $2, $3, $4, $5)`
 	_, err := r.pool.Exec(ctx, query, user.ID, user.Email, user.PasswordHash, user.Role, user.CreatedAt)
-	
+
 	if err != nil {
 		var pgErr *pgconn.PgError
 		// Unique Violation in Postgres
@@ -75,4 +75,3 @@ func (r *UserRepo) GetByID(ctx context.Context, id string) (*domain.User, error)
 	}
 	return &user, nil
 }
-

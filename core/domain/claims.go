@@ -4,4 +4,3 @@ type Claims struct {
 	UserID string
 	Role   string
 }
-
