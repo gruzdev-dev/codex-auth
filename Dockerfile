@@ -9,13 +9,15 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o main .
+RUN CGO_ENABLED=0 GOOS=linux go build -o main ./cmd/app
+RUN CGO_ENABLED=0 GOOS=linux go build -o migrator ./cmd/migrator
 
 FROM alpine:latest AS app
 
 WORKDIR /app
 
 COPY --from=builder /app/main .
+COPY --from=builder /app/migrator .
 COPY --from=builder /app/config.yaml . 
 
 CMD ["./main"]
