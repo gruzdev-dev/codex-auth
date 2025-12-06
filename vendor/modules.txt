@@ -30,6 +30,10 @@ github.com/jackc/pgx/v5/pgxpool
 ## explicit; go 1.19
 github.com/jackc/puddle/v2
 github.com/jackc/puddle/v2/internal/genstack
+# github.com/kr/text v0.2.0
+## explicit
+# github.com/rogpeppe/go-internal v1.14.1
+## explicit; go 1.23
 # go.uber.org/dig v1.17.1
 ## explicit; go 1.20
 go.uber.org/dig
