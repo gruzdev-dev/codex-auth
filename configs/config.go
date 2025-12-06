@@ -9,7 +9,6 @@ import (
 type Config struct {
 	DatabaseURL string `yaml:"database_url"`
 	JWTSecret   string `yaml:"jwt_secret"`
-	HTTPPort    string `yaml:"http_port"`
 	Server      struct {
 		Port string `yaml:"port"`
 	} `yaml:"server"`
@@ -28,7 +27,6 @@ func NewConfig() (*Config, error) {
 
 	if envPort := os.Getenv("SERVER_PORT"); envPort != "" {
 		cfg.Server.Port = envPort
-		cfg.HTTPPort = envPort
 	}
 
 	if envDBURL := os.Getenv("DATABASE_URL"); envDBURL != "" {

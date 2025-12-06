@@ -22,10 +22,12 @@ func NewHandler(authService ports.AuthService) *Handler {
 }
 
 func (h *Handler) InitRoutes(router *mux.Router) {
-	router.HandleFunc("/register", h.Register).Methods("POST")
-	router.HandleFunc("/login", h.Login).Methods("POST")
-	router.HandleFunc("/refresh", h.Refresh).Methods("POST")
-	router.HandleFunc("/validate", h.Validate).Methods("GET")
+	api := router.PathPrefix("/api/v1").Subrouter()
+
+	api.HandleFunc("/register", h.Register).Methods("POST")
+	api.HandleFunc("/login", h.Login).Methods("POST")
+	api.HandleFunc("/refresh", h.Refresh).Methods("POST")
+	api.HandleFunc("/validate", h.Validate).Methods("GET")
 }
 
 func (h *Handler) RegisterRoutes(router *mux.Router) {
