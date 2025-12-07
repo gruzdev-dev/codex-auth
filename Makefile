@@ -25,16 +25,31 @@ run-tests:
 	@echo "  - Domain Logic: Black Box Testing (equivalence partitioning, boundary value analysis)" >> $(REPORT_FILE)
 	@echo "  - Service Logic: White Box Testing (branch testing with mocks)" >> $(REPORT_FILE)
 	@echo "  - Adapters: White Box Testing (statement testing)" >> $(REPORT_FILE)
-	@echo "  - Comparing algorithms: Bcrypt (Secure) vs SHA256 (Fast)" >> $(REPORT_FILE)
-	@echo "  - Methodology: Processing dataset of varying lengths" >> $(REPORT_FILE)
-	@echo "  - Loading test scenarios from JSON file" >> $(REPORT_FILE)
-	@echo "  - Testing Assumptions (Skipping if file missing)" >> $(REPORT_FILE)
 	@echo "--------------------------------------------------" >> $(REPORT_FILE)
 	@if go test -v ./... >> $(REPORT_FILE) 2>&1; then \
 		echo "RESULT: SUCCESS" | tee -a $(REPORT_FILE); \
 	else \
 		echo "RESULT: FAILED" | tee -a $(REPORT_FILE); \
 		echo "Unit tests failed. See details above." >> $(REPORT_FILE); \
+		exit 1; \
+	fi
+	@echo "" >> $(REPORT_FILE)
+
+	@# ------------------------------------------------------------------
+	@# BENCHMARK TESTS
+	@# ------------------------------------------------------------------
+	@echo "BENCHMARK TESTING" | tee -a $(REPORT_FILE)
+	@echo "Description:" >> $(REPORT_FILE)
+	@echo "  - Comparing algorithms: Bcrypt (Secure) vs SHA256 (Fast)" >> $(REPORT_FILE)
+	@echo "  - Methodology: Processing dataset of varying lengths" >> $(REPORT_FILE)
+	@echo "  - Loading test scenarios from JSON file" >> $(REPORT_FILE)
+	@echo "  - Testing Assumptions (Skipping if file missing)" >> $(REPORT_FILE)
+	@echo "--------------------------------------------------" >> $(REPORT_FILE)
+	@if RUN_BENCHMARKS=1 go test -bench=. -benchmem ./adapters/hasher/... >> $(REPORT_FILE) 2>&1; then \
+		echo "RESULT: SUCCESS" | tee -a $(REPORT_FILE); \
+	else \
+		echo "RESULT: FAILED" | tee -a $(REPORT_FILE); \
+		echo "Benchmarks failed. See details above." >> $(REPORT_FILE); \
 		exit 1; \
 	fi
 	@echo "" >> $(REPORT_FILE)

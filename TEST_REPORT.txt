@@ -1,17 +1,13 @@
 ==================================================
          CODEX-AUTH AUTOMATED TEST REPORT         
 ==================================================
-Sun Dec  7 05:32:22 MSK 2025
+Sun Dec  7 05:34:55 MSK 2025
 
 UNIT TESTING & COVERAGE
 Description:
   - Domain Logic: Black Box Testing (equivalence partitioning, boundary value analysis)
   - Service Logic: White Box Testing (branch testing with mocks)
   - Adapters: White Box Testing (statement testing)
-  - Comparing algorithms: Bcrypt (Secure) vs SHA256 (Fast)
-  - Methodology: Processing dataset of varying lengths
-  - Loading test scenarios from JSON file
-  - Testing Assumptions (Skipping if file missing)
 --------------------------------------------------
 === RUN   TestSHA256Hasher_Hash
 --- PASS: TestSHA256Hasher_Hash (0.00s)
@@ -118,13 +114,30 @@ ok  	codex-auth/core/service	(cached)
 ?   	codex-auth/servers/http	[no test files]
 RESULT: SUCCESS
 
+BENCHMARK TESTING
+Description:
+  - Comparing algorithms: Bcrypt (Secure) vs SHA256 (Fast)
+  - Methodology: Processing dataset of varying lengths
+  - Loading test scenarios from JSON file
+  - Testing Assumptions (Skipping if file missing)
+--------------------------------------------------
+goos: linux
+goarch: amd64
+pkg: codex-auth/adapters/hasher
+cpu: 11th Gen Intel(R) Core(TM) i7-11700K @ 3.60GHz
+BenchmarkBcrypt_Hash-16    	      26	  44268043 ns/op	    5341 B/op	      10 allocs/op
+BenchmarkSHA256_Hash-16    	 1927293	       620.8 ns/op	     393 B/op	       7 allocs/op
+PASS
+ok  	codex-auth/adapters/hasher	2.354s
+RESULT: SUCCESS
+
 MUTATION TESTING
 Description:
   - Tool: gremlins
   - Scope: Core Domain & Service logic
 --------------------------------------------------
 Starting...
-Gathering coverage... done in 1.677353777s
+Gathering coverage... done in 1.674360746s
 
 No results to report.
 RESULT: SUCCESS (Mutants Killed or Clean Run)
