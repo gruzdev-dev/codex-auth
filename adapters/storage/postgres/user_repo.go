@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	"codex-auth/core/domain"
-	coreErrors "codex-auth/core/errors"
+	coreerrors "codex-auth/core/errors"
 	"codex-auth/core/ports"
 
 	"github.com/jackc/pgx/v5"
@@ -31,7 +31,7 @@ func (r *UserRepo) Save(ctx context.Context, user *domain.User) error {
 		var pgErr *pgconn.PgError
 		// Unique Violation in Postgres
 		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
-			return coreErrors.ErrUserAlreadyExists
+			return coreerrors.ErrUserAlreadyExists
 		}
 		return err
 	}
@@ -50,7 +50,7 @@ func (r *UserRepo) GetByEmail(ctx context.Context, email string) (*domain.User, 
 	)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return nil, coreErrors.ErrUserNotFound
+			return nil, coreerrors.ErrUserNotFound
 		}
 		return nil, err
 	}
@@ -69,7 +69,7 @@ func (r *UserRepo) GetByID(ctx context.Context, id string) (*domain.User, error)
 	)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return nil, coreErrors.ErrUserNotFound
+			return nil, coreerrors.ErrUserNotFound
 		}
 		return nil, err
 	}
