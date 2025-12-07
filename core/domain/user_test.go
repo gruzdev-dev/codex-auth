@@ -188,6 +188,30 @@ func TestNewUser_BoundaryValueAnalysis(t *testing.T) {
 				assert.Equal(t, errors.ErrPasswordTooLong, err)
 			},
 		},
+		{
+			name:          "Email boundary - exactly 255 characters",
+			email:         strings.Repeat("a", 253) + "@b",
+			passwordHash:  "12345678",
+			role:          "user",
+			expectedError: nil,
+			validate: func(t *testing.T, user *User, err error) {
+				require.NoError(t, err)
+				require.NotNil(t, user)
+				assert.Equal(t, 255, len(user.Email))
+			},
+		},
+		{
+			name:          "Email boundary - 256 characters (too long)",
+			email:         strings.Repeat("a", 254) + "@b",
+			passwordHash:  "12345678",
+			role:          "user",
+			expectedError: errors.ErrEmailTooLong,
+			validate: func(t *testing.T, user *User, err error) {
+				assert.Error(t, err)
+				assert.Nil(t, user)
+				assert.Equal(t, errors.ErrEmailTooLong, err)
+			},
+		},
 	}
 
 	for _, tt := range tests {

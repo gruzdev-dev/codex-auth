@@ -61,11 +61,12 @@ run-tests:
 	@echo "Description:" >> $(REPORT_FILE)
 	@echo "  - Tool: gremlins" >> $(REPORT_FILE)
 	@echo "  - Scope: Core Domain & Service logic" >> $(REPORT_FILE)
+	@echo "  - Detailed output will be included in this report" >> $(REPORT_FILE)
 	@echo "--------------------------------------------------" >> $(REPORT_FILE)
 	@echo "Building Mutation Docker Image..."
 	@docker build -q -f $(MUTATION_DOCKERFILE) -t $(MUTATION_IMAGE) . > /dev/null
 	@echo "Running Mutation Tests (This may take a while)..."
-	@if docker run --rm $(MUTATION_IMAGE) >> $(REPORT_FILE) 2>&1; then \
+	@if docker run --rm $(MUTATION_IMAGE) 2>&1 | tee -a $(REPORT_FILE); then \
 		echo "RESULT: SUCCESS (Mutants Killed or Clean Run)" | tee -a $(REPORT_FILE); \
 	else \
 		echo "RESULT: WARNING (Some Mutants Survived)" | tee -a $(REPORT_FILE); \

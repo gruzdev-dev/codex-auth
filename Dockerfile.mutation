@@ -9,4 +9,6 @@ RUN go mod download
 
 COPY . .
 
-ENTRYPOINT ["gremlins", "unleash", "./core/..."]
+RUN go test ./core/... -v
+
+ENTRYPOINT ["gremlins", "unleash", "--config=gremlins.yaml"]

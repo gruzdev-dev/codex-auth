@@ -6,7 +6,7 @@ import (
 	"codex-auth/core/domain"
 )
 
-//go:generate mockgen -source=interfaces.go -destination=mock_interfaces.go -package=ports
+//go:generate mockgen -source=interfaces.go -destination=interfaces_mocks.go -package=ports
 
 type AuthService interface {
 	Register(ctx context.Context, email, password string) (*domain.User, error)

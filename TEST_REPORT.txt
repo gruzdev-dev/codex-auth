@@ -1,7 +1,7 @@
 ==================================================
          CODEX-AUTH AUTOMATED TEST REPORT         
 ==================================================
-Sun Dec  7 05:34:55 MSK 2025
+Sun Dec  7 15:36:26 MSK 2025
 
 UNIT TESTING & COVERAGE
 Description:
@@ -51,12 +51,16 @@ ok  	codex-auth/adapters/hasher	(cached)
 === RUN   TestNewUser_BoundaryValueAnalysis/Min_+_1
 === RUN   TestNewUser_BoundaryValueAnalysis/Max
 === RUN   TestNewUser_BoundaryValueAnalysis/Max_+_1
+=== RUN   TestNewUser_BoundaryValueAnalysis/Email_boundary_-_exactly_255_characters
+=== RUN   TestNewUser_BoundaryValueAnalysis/Email_boundary_-_256_characters_(too_long)
 --- PASS: TestNewUser_BoundaryValueAnalysis (0.00s)
     --- PASS: TestNewUser_BoundaryValueAnalysis/Min_-_1 (0.00s)
     --- PASS: TestNewUser_BoundaryValueAnalysis/Min (0.00s)
     --- PASS: TestNewUser_BoundaryValueAnalysis/Min_+_1 (0.00s)
     --- PASS: TestNewUser_BoundaryValueAnalysis/Max (0.00s)
     --- PASS: TestNewUser_BoundaryValueAnalysis/Max_+_1 (0.00s)
+    --- PASS: TestNewUser_BoundaryValueAnalysis/Email_boundary_-_exactly_255_characters (0.00s)
+    --- PASS: TestNewUser_BoundaryValueAnalysis/Email_boundary_-_256_characters_(too_long) (0.00s)
 PASS
 ok  	codex-auth/core/domain	(cached)
 ?   	codex-auth/core/errors	[no test files]
@@ -81,24 +85,28 @@ ok  	codex-auth/core/domain	(cached)
 === RUN   TestUserService_Login/repository_error
 === RUN   TestUserService_Login/invalid_password
 === RUN   TestUserService_Login/token_generation_error
+=== RUN   TestUserService_Login/repository_error_with_user_returned
 --- PASS: TestUserService_Login (0.00s)
     --- PASS: TestUserService_Login/success_path (0.00s)
     --- PASS: TestUserService_Login/user_not_found (0.00s)
     --- PASS: TestUserService_Login/repository_error (0.00s)
     --- PASS: TestUserService_Login/invalid_password (0.00s)
     --- PASS: TestUserService_Login/token_generation_error (0.00s)
+    --- PASS: TestUserService_Login/repository_error_with_user_returned (0.00s)
 === RUN   TestUserService_Refresh
 === RUN   TestUserService_Refresh/success_path
 === RUN   TestUserService_Refresh/invalid_refresh_token
 === RUN   TestUserService_Refresh/user_not_found
 === RUN   TestUserService_Refresh/repository_error
 === RUN   TestUserService_Refresh/token_generation_error
+=== RUN   TestUserService_Refresh/repository_error_with_user_returned
 --- PASS: TestUserService_Refresh (0.00s)
     --- PASS: TestUserService_Refresh/success_path (0.00s)
     --- PASS: TestUserService_Refresh/invalid_refresh_token (0.00s)
     --- PASS: TestUserService_Refresh/user_not_found (0.00s)
     --- PASS: TestUserService_Refresh/repository_error (0.00s)
     --- PASS: TestUserService_Refresh/token_generation_error (0.00s)
+    --- PASS: TestUserService_Refresh/repository_error_with_user_returned (0.00s)
 === RUN   TestUserService_ValidateToken
 === RUN   TestUserService_ValidateToken/success
 === RUN   TestUserService_ValidateToken/invalid_token
@@ -108,7 +116,7 @@ ok  	codex-auth/core/domain	(cached)
     --- PASS: TestUserService_ValidateToken/invalid_token (0.00s)
     --- PASS: TestUserService_ValidateToken/expired_token (0.00s)
 PASS
-ok  	codex-auth/core/service	(cached)
+ok  	codex-auth/core/service	0.004s
 ?   	codex-auth/middleware/http	[no test files]
 ?   	codex-auth/migrations	[no test files]
 ?   	codex-auth/servers/http	[no test files]
@@ -125,20 +133,55 @@ goos: linux
 goarch: amd64
 pkg: codex-auth/adapters/hasher
 cpu: 11th Gen Intel(R) Core(TM) i7-11700K @ 3.60GHz
-BenchmarkBcrypt_Hash-16    	      26	  44268043 ns/op	    5341 B/op	      10 allocs/op
-BenchmarkSHA256_Hash-16    	 1927293	       620.8 ns/op	     393 B/op	       7 allocs/op
+BenchmarkBcrypt_Hash-16    	      26	  44461949 ns/op	    5553 B/op	      10 allocs/op
+BenchmarkSHA256_Hash-16    	 1931294	       619.6 ns/op	     393 B/op	       7 allocs/op
 PASS
-ok  	codex-auth/adapters/hasher	2.354s
+ok  	codex-auth/adapters/hasher	2.358s
 RESULT: SUCCESS
 
 MUTATION TESTING
 Description:
   - Tool: gremlins
   - Scope: Core Domain & Service logic
+  - Detailed output will be included in this report
 --------------------------------------------------
 Starting...
-Gathering coverage... done in 1.674360746s
+Gathering coverage... done in 2.827385213s
+      KILLED INVERT_BITWISE at core/service/user_service.go:18:9
+      KILLED CONDITIONALS_BOUNDARY at core/domain/user.go:46:23
+      KILLED CONDITIONALS_NEGATION at core/domain/user.go:54:10
+      KILLED INVERT_BITWISE at core/domain/user.go:58:9
+      KILLED CONDITIONALS_NEGATION at core/domain/user.go:43:23
+      KILLED CONDITIONALS_NEGATION at core/domain/user.go:54:30
+      KILLED CONDITIONALS_NEGATION at core/domain/user.go:46:23
+      KILLED CONDITIONALS_NEGATION at core/service/user_service.go:27:9
+      KILLED CONDITIONALS_NEGATION at core/domain/user.go:40:18
+      KILLED INVERT_LOGICAL at core/domain/user.go:54:22
+      KILLED CONDITIONALS_NEGATION at core/domain/user.go:32:16
+      KILLED CONDITIONALS_NEGATION at core/domain/user.go:29:11
+      KILLED CONDITIONALS_NEGATION at core/domain/user.go:51:10
+      KILLED CONDITIONALS_BOUNDARY at core/domain/user.go:43:23
+      KILLED CONDITIONALS_BOUNDARY at core/domain/user.go:32:16
+      KILLED CONDITIONALS_NEGATION at core/service/user_service.go:30:9
+      KILLED CONDITIONALS_NEGATION at core/service/user_service.go:35:9
+      KILLED CONDITIONALS_NEGATION at core/service/user_service.go:40:9
+      KILLED INVERT_LOGICAL at core/service/user_service.go:53:16
+      KILLED CONDITIONALS_NEGATION at core/service/user_service.go:53:9
+      KILLED CONDITIONALS_NEGATION at core/service/user_service.go:62:9
+      KILLED CONDITIONALS_NEGATION at core/service/user_service.go:44:44
+      KILLED CONDITIONALS_NEGATION at core/service/user_service.go:53:24
+      KILLED CONDITIONALS_NEGATION at core/service/user_service.go:76:24
+      KILLED CONDITIONALS_NEGATION at core/service/user_service.go:57:63
+      KILLED INVERT_LOGICAL at core/service/user_service.go:76:16
+      KILLED CONDITIONALS_NEGATION at core/service/user_service.go:76:9
+      KILLED CONDITIONALS_NEGATION at core/service/user_service.go:71:9
+      KILLED CONDITIONALS_NEGATION at core/service/user_service.go:81:9
+      KILLED CONDITIONALS_NEGATION at core/service/user_service.go:90:9
 
-No results to report.
+Mutation testing completed in 6 seconds 43 milliseconds
+Killed: 30, Lived: 0, Not covered: 0
+Timed out: 0, Not viable: 0, Skipped: 0
+Test efficacy: 100.00%
+Mutator coverage: 100.00%
 RESULT: SUCCESS (Mutants Killed or Clean Run)
 

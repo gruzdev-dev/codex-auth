@@ -259,6 +259,26 @@ func TestUserService_Login(t *testing.T) {
 				assert.Equal(t, "token generation failed", err.Error())
 			},
 		},
+		{
+			name:     "repository error with user returned",
+			email:    "test@example.com",
+			password: "password123",
+			setupMocks: func(userRepo *ports.MockUserRepository, hasher *ports.MockPasswordHasher, tokenManager *ports.MockTokenManager) {
+				user := &domain.User{
+					ID:           "user-id",
+					Email:        "test@example.com",
+					PasswordHash: "hashed_password",
+					Role:         "user",
+				}
+				userRepo.EXPECT().GetByEmail(gomock.Any(), "test@example.com").Return(user, errors.New("database error"))
+			},
+			expectedError: coreerrors.ErrInvalidCredentials,
+			validateResult: func(t *testing.T, tokenPair *domain.TokenPair, err error) {
+				assert.Error(t, err)
+				assert.Nil(t, tokenPair)
+				assert.Equal(t, coreerrors.ErrInvalidCredentials, err)
+			},
+		},
 	}
 
 	for _, tt := range tests {
@@ -380,6 +400,25 @@ func TestUserService_Refresh(t *testing.T) {
 				assert.Error(t, err)
 				assert.Nil(t, tokenPair)
 				assert.Equal(t, "token generation failed", err.Error())
+			},
+		},
+		{
+			name:         "repository error with user returned",
+			refreshToken: "valid_refresh_token",
+			setupMocks: func(userRepo *ports.MockUserRepository, hasher *ports.MockPasswordHasher, tokenManager *ports.MockTokenManager) {
+				tokenManager.EXPECT().ValidateRefreshToken("valid_refresh_token").Return("user-id", nil)
+				user := &domain.User{
+					ID:    "user-id",
+					Email: "test@example.com",
+					Role:  "user",
+				}
+				userRepo.EXPECT().GetByID(gomock.Any(), "user-id").Return(user, errors.New("database error"))
+			},
+			expectedError: coreerrors.ErrUserNotFound,
+			validateResult: func(t *testing.T, tokenPair *domain.TokenPair, err error) {
+				assert.Error(t, err)
+				assert.Nil(t, tokenPair)
+				assert.Equal(t, coreerrors.ErrUserNotFound, err)
 			},
 		},
 	}
