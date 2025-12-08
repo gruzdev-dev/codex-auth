@@ -103,4 +103,5 @@ func InitializeTestSuite(ctx *godog.TestSuiteContext) {}
 func InitializeScenario(ctx *godog.ScenarioContext) {
 	InitializeAuthScenario(ctx)
 	InitializeValidationScenario(ctx)
+	InitializePerformanceScenario(ctx)
 }
