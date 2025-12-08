@@ -47,6 +47,12 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 			h.writeError(w, http.StatusConflict, err.Error())
 			return
 		}
+		if err == errors.ErrEmailRequired || err == errors.ErrInvalidEmailFormat ||
+			err == errors.ErrEmailTooLong || err == errors.ErrPasswordRequired ||
+			err == errors.ErrPasswordTooShort || err == errors.ErrPasswordTooLong {
+			h.writeError(w, http.StatusBadRequest, err.Error())
+			return
+		}
 		h.writeError(w, http.StatusInternalServerError, "internal server error")
 		return
 	}

@@ -290,3 +290,55 @@ func (mr *MockTokenManagerMockRecorder) ValidateRefreshToken(refreshToken any) *
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateRefreshToken", reflect.TypeOf((*MockTokenManager)(nil).ValidateRefreshToken), refreshToken)
 }
+
+// MockValidationService is a mock of ValidationService interface.
+type MockValidationService struct {
+	ctrl     *gomock.Controller
+	recorder *MockValidationServiceMockRecorder
+	isgomock struct{}
+}
+
+// MockValidationServiceMockRecorder is the mock recorder for MockValidationService.
+type MockValidationServiceMockRecorder struct {
+	mock *MockValidationService
+}
+
+// NewMockValidationService creates a new mock instance.
+func NewMockValidationService(ctrl *gomock.Controller) *MockValidationService {
+	mock := &MockValidationService{ctrl: ctrl}
+	mock.recorder = &MockValidationServiceMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockValidationService) EXPECT() *MockValidationServiceMockRecorder {
+	return m.recorder
+}
+
+// ValidateEmail mocks base method.
+func (m *MockValidationService) ValidateEmail(email string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ValidateEmail", email)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ValidateEmail indicates an expected call of ValidateEmail.
+func (mr *MockValidationServiceMockRecorder) ValidateEmail(email any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateEmail", reflect.TypeOf((*MockValidationService)(nil).ValidateEmail), email)
+}
+
+// ValidatePassword mocks base method.
+func (m *MockValidationService) ValidatePassword(password string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ValidatePassword", password)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ValidatePassword indicates an expected call of ValidatePassword.
+func (mr *MockValidationServiceMockRecorder) ValidatePassword(password any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidatePassword", reflect.TypeOf((*MockValidationService)(nil).ValidatePassword), password)
+}

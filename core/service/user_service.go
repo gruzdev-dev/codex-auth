@@ -12,17 +12,31 @@ type userService struct {
 	userRepo     ports.UserRepository
 	hasher       ports.PasswordHasher
 	tokenManager ports.TokenManager
+	validator    ports.ValidationService
 }
 
-func NewUserService(userRepo ports.UserRepository, hasher ports.PasswordHasher, tokenManager ports.TokenManager) ports.AuthService {
+func NewUserService(
+	userRepo ports.UserRepository,
+	hasher ports.PasswordHasher,
+	tokenManager ports.TokenManager,
+	validator ports.ValidationService) ports.AuthService {
 	return &userService{
 		userRepo:     userRepo,
 		hasher:       hasher,
 		tokenManager: tokenManager,
+		validator:    validator,
 	}
 }
 
 func (s *userService) Register(ctx context.Context, email, password string) (*domain.User, error) {
+	if err := s.validator.ValidateEmail(email); err != nil {
+		return nil, err
+	}
+
+	if err := s.validator.ValidatePassword(password); err != nil {
+		return nil, err
+	}
+
 	_, err := s.userRepo.GetByEmail(ctx, email)
 	if err == nil {
 		return nil, errors.ErrUserAlreadyExists

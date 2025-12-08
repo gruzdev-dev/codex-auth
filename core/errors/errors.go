@@ -15,4 +15,5 @@ var (
 	ErrPasswordTooLong    = errors.New("password is too long")
 	ErrRoleRequired       = errors.New("role is required")
 	ErrInvalidRole        = errors.New("invalid role")
+	ErrInvalidUser        = errors.New("invalid user")
 )

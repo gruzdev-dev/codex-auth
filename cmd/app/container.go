@@ -40,6 +40,10 @@ func BuildContainer() (*dig.Container, error) {
 		return nil, err
 	}
 
+	if err := container.Provide(service.NewValidationService, dig.As(new(ports.ValidationService))); err != nil {
+		return nil, err
+	}
+
 	if err := container.Provide(service.NewUserService, dig.As(new(ports.AuthService))); err != nil {
 		return nil, err
 	}

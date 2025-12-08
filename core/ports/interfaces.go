@@ -31,3 +31,8 @@ type TokenManager interface {
 	Parse(accessToken string) (*domain.Claims, error)
 	ValidateRefreshToken(refreshToken string) (string, error)
 }
+
+type ValidationService interface {
+	ValidateEmail(email string) error
+	ValidatePassword(password string) error
+}

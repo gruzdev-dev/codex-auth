@@ -40,8 +40,9 @@ func newAuthTestState() *authTestState {
 	repo := postgres.NewUserRepo(dbPool)
 	hash := hasher.NewBcryptHasher()
 	tokenManager := token.NewJWTManager(secret, tokenTTL)
+	validator := service.NewValidationService()
 
-	svc := service.NewUserService(repo, hash, tokenManager)
+	svc := service.NewUserService(repo, hash, tokenManager, validator)
 	handler := authHttp.NewHandler(svc)
 
 	router := mux.NewRouter()
@@ -209,7 +210,7 @@ func (t *authTestState) oldAccessTokenShouldBeInvalid(ctx context.Context, ttl s
 	if err != nil {
 		return fmt.Errorf("failed to convert ttl to int: %w", err)
 	}
-	
+
 	time.Sleep(time.Duration(ttlInt) * time.Second)
 
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/validate", nil)

@@ -19,7 +19,7 @@ func TestUserService_Register(t *testing.T) {
 		name           string
 		email          string
 		password       string
-		setupMocks     func(*ports.MockUserRepository, *ports.MockPasswordHasher, *ports.MockTokenManager)
+		setupMocks     func(*ports.MockUserRepository, *ports.MockPasswordHasher, *ports.MockTokenManager, *ports.MockValidationService)
 		expectedError  error
 		validateResult func(*testing.T, *domain.User, error)
 	}{
@@ -27,7 +27,12 @@ func TestUserService_Register(t *testing.T) {
 			name:     "success path",
 			email:    "test@example.com",
 			password: "password123",
-			setupMocks: func(userRepo *ports.MockUserRepository, hasher *ports.MockPasswordHasher, tokenManager *ports.MockTokenManager) {
+			setupMocks: func(
+				userRepo *ports.MockUserRepository,
+				hasher *ports.MockPasswordHasher,
+				tokenManager *ports.MockTokenManager,
+				validator *ports.MockValidationService,
+			) {
 				userRepo.EXPECT().GetByEmail(gomock.Any(), "test@example.com").Return(nil, coreerrors.ErrUserNotFound)
 				hasher.EXPECT().Hash("password123").Return("hashed_password", nil)
 				userRepo.EXPECT().Save(gomock.Any(), gomock.Any()).DoAndReturn(func(ctx context.Context, user *domain.User) error {
@@ -37,6 +42,8 @@ func TestUserService_Register(t *testing.T) {
 					require.Equal(t, "user", user.Role)
 					return nil
 				})
+				validator.EXPECT().ValidateEmail("test@example.com").Return(nil)
+				validator.EXPECT().ValidatePassword("password123").Return(nil)
 			},
 			expectedError: nil,
 			validateResult: func(t *testing.T, user *domain.User, err error) {
@@ -51,9 +58,16 @@ func TestUserService_Register(t *testing.T) {
 			name:     "user already exists",
 			email:    "existing@example.com",
 			password: "password123",
-			setupMocks: func(userRepo *ports.MockUserRepository, hasher *ports.MockPasswordHasher, tokenManager *ports.MockTokenManager) {
+			setupMocks: func(
+				userRepo *ports.MockUserRepository,
+				hasher *ports.MockPasswordHasher,
+				tokenManager *ports.MockTokenManager,
+				validator *ports.MockValidationService,
+			) {
 				existingUser := &domain.User{Email: "existing@example.com"}
 				userRepo.EXPECT().GetByEmail(gomock.Any(), "existing@example.com").Return(existingUser, nil)
+				validator.EXPECT().ValidateEmail("existing@example.com").Return(nil)
+				validator.EXPECT().ValidatePassword("password123").Return(nil)
 			},
 			expectedError: coreerrors.ErrUserAlreadyExists,
 			validateResult: func(t *testing.T, user *domain.User, err error) {
@@ -66,8 +80,15 @@ func TestUserService_Register(t *testing.T) {
 			name:     "repository error on get by email",
 			email:    "test@example.com",
 			password: "password123",
-			setupMocks: func(userRepo *ports.MockUserRepository, hasher *ports.MockPasswordHasher, tokenManager *ports.MockTokenManager) {
+			setupMocks: func(
+				userRepo *ports.MockUserRepository,
+				hasher *ports.MockPasswordHasher,
+				tokenManager *ports.MockTokenManager,
+				validator *ports.MockValidationService,
+			) {
 				userRepo.EXPECT().GetByEmail(gomock.Any(), "test@example.com").Return(nil, errors.New("database error"))
+				validator.EXPECT().ValidateEmail("test@example.com").Return(nil)
+				validator.EXPECT().ValidatePassword("password123").Return(nil)
 			},
 			expectedError: errors.New("database error"),
 			validateResult: func(t *testing.T, user *domain.User, err error) {
@@ -80,9 +101,16 @@ func TestUserService_Register(t *testing.T) {
 			name:     "hash error",
 			email:    "test@example.com",
 			password: "password123",
-			setupMocks: func(userRepo *ports.MockUserRepository, hasher *ports.MockPasswordHasher, tokenManager *ports.MockTokenManager) {
+			setupMocks: func(
+				userRepo *ports.MockUserRepository,
+				hasher *ports.MockPasswordHasher,
+				tokenManager *ports.MockTokenManager,
+				validator *ports.MockValidationService,
+			) {
 				userRepo.EXPECT().GetByEmail(gomock.Any(), "test@example.com").Return(nil, coreerrors.ErrUserNotFound)
 				hasher.EXPECT().Hash("password123").Return("", errors.New("hashing failed"))
+				validator.EXPECT().ValidateEmail("test@example.com").Return(nil)
+				validator.EXPECT().ValidatePassword("password123").Return(nil)
 			},
 			expectedError: errors.New("hashing failed"),
 			validateResult: func(t *testing.T, user *domain.User, err error) {
@@ -95,10 +123,17 @@ func TestUserService_Register(t *testing.T) {
 			name:     "save error",
 			email:    "test@example.com",
 			password: "password123",
-			setupMocks: func(userRepo *ports.MockUserRepository, hasher *ports.MockPasswordHasher, tokenManager *ports.MockTokenManager) {
+			setupMocks: func(
+				userRepo *ports.MockUserRepository,
+				hasher *ports.MockPasswordHasher,
+				tokenManager *ports.MockTokenManager,
+				validator *ports.MockValidationService,
+			) {
 				userRepo.EXPECT().GetByEmail(gomock.Any(), "test@example.com").Return(nil, coreerrors.ErrUserNotFound)
 				hasher.EXPECT().Hash("password123").Return("hashed_password", nil)
 				userRepo.EXPECT().Save(gomock.Any(), gomock.Any()).Return(errors.New("save failed"))
+				validator.EXPECT().ValidateEmail("test@example.com").Return(nil)
+				validator.EXPECT().ValidatePassword("password123").Return(nil)
 			},
 			expectedError: errors.New("save failed"),
 			validateResult: func(t *testing.T, user *domain.User, err error) {
@@ -108,18 +143,42 @@ func TestUserService_Register(t *testing.T) {
 			},
 		},
 		{
-			name:     "domain validation error",
+			name:     "email validation error",
 			email:    "invalid-email",
 			password: "password123",
-			setupMocks: func(userRepo *ports.MockUserRepository, hasher *ports.MockPasswordHasher, tokenManager *ports.MockTokenManager) {
-				userRepo.EXPECT().GetByEmail(gomock.Any(), "invalid-email").Return(nil, coreerrors.ErrUserNotFound)
-				hasher.EXPECT().Hash("password123").Return("hashed_password", nil)
+			setupMocks: func(
+				userRepo *ports.MockUserRepository,
+				hasher *ports.MockPasswordHasher,
+				tokenManager *ports.MockTokenManager,
+				validator *ports.MockValidationService,
+			) {
+				validator.EXPECT().ValidateEmail("invalid-email").Return(coreerrors.ErrInvalidEmailFormat)
 			},
 			expectedError: coreerrors.ErrInvalidEmailFormat,
 			validateResult: func(t *testing.T, user *domain.User, err error) {
 				assert.Error(t, err)
 				assert.Nil(t, user)
 				assert.Equal(t, coreerrors.ErrInvalidEmailFormat, err)
+			},
+		},
+		{
+			name:     "password validation error",
+			email:    "test@example.com",
+			password: "bad",
+			setupMocks: func(
+				userRepo *ports.MockUserRepository,
+				hasher *ports.MockPasswordHasher,
+				tokenManager *ports.MockTokenManager,
+				validator *ports.MockValidationService,
+			) {
+				validator.EXPECT().ValidateEmail("test@example.com").Return(nil)
+				validator.EXPECT().ValidatePassword("bad").Return(coreerrors.ErrPasswordTooShort)
+			},
+			expectedError: coreerrors.ErrPasswordTooShort,
+			validateResult: func(t *testing.T, user *domain.User, err error) {
+				assert.Error(t, err)
+				assert.Nil(t, user)
+				assert.Equal(t, coreerrors.ErrPasswordTooShort, err)
 			},
 		},
 	}
@@ -132,10 +191,11 @@ func TestUserService_Register(t *testing.T) {
 			userRepo := ports.NewMockUserRepository(ctrl)
 			hasher := ports.NewMockPasswordHasher(ctrl)
 			tokenManager := ports.NewMockTokenManager(ctrl)
+			validator := ports.NewMockValidationService(ctrl)
 
-			tt.setupMocks(userRepo, hasher, tokenManager)
+			tt.setupMocks(userRepo, hasher, tokenManager, validator)
 
-			service := NewUserService(userRepo, hasher, tokenManager)
+			service := NewUserService(userRepo, hasher, tokenManager, validator)
 			user, err := service.Register(context.Background(), tt.email, tt.password)
 
 			if tt.expectedError != nil {
@@ -157,7 +217,7 @@ func TestUserService_Login(t *testing.T) {
 		branch         string
 		email          string
 		password       string
-		setupMocks     func(*ports.MockUserRepository, *ports.MockPasswordHasher, *ports.MockTokenManager)
+		setupMocks     func(*ports.MockUserRepository, *ports.MockPasswordHasher, *ports.MockTokenManager, *ports.MockValidationService)
 		expectedError  error
 		validateResult func(*testing.T, *domain.TokenPair, error)
 	}{
@@ -165,7 +225,12 @@ func TestUserService_Login(t *testing.T) {
 			name:     "success path",
 			email:    "test@example.com",
 			password: "password123",
-			setupMocks: func(userRepo *ports.MockUserRepository, hasher *ports.MockPasswordHasher, tokenManager *ports.MockTokenManager) {
+			setupMocks: func(
+				userRepo *ports.MockUserRepository,
+				hasher *ports.MockPasswordHasher,
+				tokenManager *ports.MockTokenManager,
+				validator *ports.MockValidationService,
+			) {
 				user := &domain.User{
 					ID:           "user-id",
 					Email:        "test@example.com",
@@ -192,7 +257,12 @@ func TestUserService_Login(t *testing.T) {
 			name:     "user not found",
 			email:    "test@example.com",
 			password: "password123",
-			setupMocks: func(userRepo *ports.MockUserRepository, hasher *ports.MockPasswordHasher, tokenManager *ports.MockTokenManager) {
+			setupMocks: func(
+				userRepo *ports.MockUserRepository,
+				hasher *ports.MockPasswordHasher,
+				tokenManager *ports.MockTokenManager,
+				validator *ports.MockValidationService,
+			) {
 				userRepo.EXPECT().GetByEmail(gomock.Any(), "test@example.com").Return(nil, coreerrors.ErrUserNotFound)
 			},
 			expectedError: coreerrors.ErrInvalidCredentials,
@@ -206,7 +276,12 @@ func TestUserService_Login(t *testing.T) {
 			name:     "repository error",
 			email:    "test@example.com",
 			password: "password123",
-			setupMocks: func(userRepo *ports.MockUserRepository, hasher *ports.MockPasswordHasher, tokenManager *ports.MockTokenManager) {
+			setupMocks: func(
+				userRepo *ports.MockUserRepository,
+				hasher *ports.MockPasswordHasher,
+				tokenManager *ports.MockTokenManager,
+				validator *ports.MockValidationService,
+			) {
 				userRepo.EXPECT().GetByEmail(gomock.Any(), "test@example.com").Return(nil, errors.New("database error"))
 			},
 			expectedError: coreerrors.ErrInvalidCredentials,
@@ -220,7 +295,12 @@ func TestUserService_Login(t *testing.T) {
 			name:     "invalid password",
 			email:    "test@example.com",
 			password: "wrong_password",
-			setupMocks: func(userRepo *ports.MockUserRepository, hasher *ports.MockPasswordHasher, tokenManager *ports.MockTokenManager) {
+			setupMocks: func(
+				userRepo *ports.MockUserRepository,
+				hasher *ports.MockPasswordHasher,
+				tokenManager *ports.MockTokenManager,
+				validator *ports.MockValidationService,
+			) {
 				user := &domain.User{
 					ID:           "user-id",
 					Email:        "test@example.com",
@@ -241,7 +321,12 @@ func TestUserService_Login(t *testing.T) {
 			name:     "token generation error",
 			email:    "test@example.com",
 			password: "password123",
-			setupMocks: func(userRepo *ports.MockUserRepository, hasher *ports.MockPasswordHasher, tokenManager *ports.MockTokenManager) {
+			setupMocks: func(
+				userRepo *ports.MockUserRepository,
+				hasher *ports.MockPasswordHasher,
+				tokenManager *ports.MockTokenManager,
+				validator *ports.MockValidationService,
+			) {
 				user := &domain.User{
 					ID:           "user-id",
 					Email:        "test@example.com",
@@ -263,7 +348,12 @@ func TestUserService_Login(t *testing.T) {
 			name:     "repository error with user returned",
 			email:    "test@example.com",
 			password: "password123",
-			setupMocks: func(userRepo *ports.MockUserRepository, hasher *ports.MockPasswordHasher, tokenManager *ports.MockTokenManager) {
+			setupMocks: func(
+				userRepo *ports.MockUserRepository,
+				hasher *ports.MockPasswordHasher,
+				tokenManager *ports.MockTokenManager,
+				validator *ports.MockValidationService,
+			) {
 				user := &domain.User{
 					ID:           "user-id",
 					Email:        "test@example.com",
@@ -289,10 +379,11 @@ func TestUserService_Login(t *testing.T) {
 			userRepo := ports.NewMockUserRepository(ctrl)
 			hasher := ports.NewMockPasswordHasher(ctrl)
 			tokenManager := ports.NewMockTokenManager(ctrl)
+			validator := ports.NewMockValidationService(ctrl)
 
-			tt.setupMocks(userRepo, hasher, tokenManager)
+			tt.setupMocks(userRepo, hasher, tokenManager, validator)
 
-			service := NewUserService(userRepo, hasher, tokenManager)
+			service := NewUserService(userRepo, hasher, tokenManager, validator)
 			tokenPair, err := service.Login(context.Background(), tt.email, tt.password)
 
 			if tt.expectedError != nil {
@@ -312,14 +403,19 @@ func TestUserService_Refresh(t *testing.T) {
 	tests := []struct {
 		name           string
 		refreshToken   string
-		setupMocks     func(*ports.MockUserRepository, *ports.MockPasswordHasher, *ports.MockTokenManager)
+		setupMocks     func(*ports.MockUserRepository, *ports.MockPasswordHasher, *ports.MockTokenManager, *ports.MockValidationService)
 		expectedError  error
 		validateResult func(*testing.T, *domain.TokenPair, error)
 	}{
 		{
 			name:         "success path",
 			refreshToken: "valid_refresh_token",
-			setupMocks: func(userRepo *ports.MockUserRepository, hasher *ports.MockPasswordHasher, tokenManager *ports.MockTokenManager) {
+			setupMocks: func(
+				userRepo *ports.MockUserRepository,
+				hasher *ports.MockPasswordHasher,
+				tokenManager *ports.MockTokenManager,
+				validator *ports.MockValidationService,
+			) {
 				tokenManager.EXPECT().ValidateRefreshToken("valid_refresh_token").Return("user-id", nil)
 				user := &domain.User{
 					ID:    "user-id",
@@ -344,7 +440,12 @@ func TestUserService_Refresh(t *testing.T) {
 		{
 			name:         "invalid refresh token",
 			refreshToken: "invalid_token",
-			setupMocks: func(userRepo *ports.MockUserRepository, hasher *ports.MockPasswordHasher, tokenManager *ports.MockTokenManager) {
+			setupMocks: func(
+				userRepo *ports.MockUserRepository,
+				hasher *ports.MockPasswordHasher,
+				tokenManager *ports.MockTokenManager,
+				validator *ports.MockValidationService,
+			) {
 				tokenManager.EXPECT().ValidateRefreshToken("invalid_token").Return("", errors.New("invalid token"))
 			},
 			expectedError: coreerrors.ErrInvalidToken,
@@ -357,7 +458,12 @@ func TestUserService_Refresh(t *testing.T) {
 		{
 			name:         "user not found",
 			refreshToken: "valid_refresh_token",
-			setupMocks: func(userRepo *ports.MockUserRepository, hasher *ports.MockPasswordHasher, tokenManager *ports.MockTokenManager) {
+			setupMocks: func(
+				userRepo *ports.MockUserRepository,
+				hasher *ports.MockPasswordHasher,
+				tokenManager *ports.MockTokenManager,
+				validator *ports.MockValidationService,
+			) {
 				tokenManager.EXPECT().ValidateRefreshToken("valid_refresh_token").Return("user-id", nil)
 				userRepo.EXPECT().GetByID(gomock.Any(), "user-id").Return(nil, coreerrors.ErrUserNotFound)
 			},
@@ -371,7 +477,12 @@ func TestUserService_Refresh(t *testing.T) {
 		{
 			name:         "repository error",
 			refreshToken: "valid_refresh_token",
-			setupMocks: func(userRepo *ports.MockUserRepository, hasher *ports.MockPasswordHasher, tokenManager *ports.MockTokenManager) {
+			setupMocks: func(
+				userRepo *ports.MockUserRepository,
+				hasher *ports.MockPasswordHasher,
+				tokenManager *ports.MockTokenManager,
+				validator *ports.MockValidationService,
+			) {
 				tokenManager.EXPECT().ValidateRefreshToken("valid_refresh_token").Return("user-id", nil)
 				userRepo.EXPECT().GetByID(gomock.Any(), "user-id").Return(nil, errors.New("database error"))
 			},
@@ -385,7 +496,12 @@ func TestUserService_Refresh(t *testing.T) {
 		{
 			name:         "token generation error",
 			refreshToken: "valid_refresh_token",
-			setupMocks: func(userRepo *ports.MockUserRepository, hasher *ports.MockPasswordHasher, tokenManager *ports.MockTokenManager) {
+			setupMocks: func(
+				userRepo *ports.MockUserRepository,
+				hasher *ports.MockPasswordHasher,
+				tokenManager *ports.MockTokenManager,
+				validator *ports.MockValidationService,
+			) {
 				tokenManager.EXPECT().ValidateRefreshToken("valid_refresh_token").Return("user-id", nil)
 				user := &domain.User{
 					ID:    "user-id",
@@ -405,7 +521,12 @@ func TestUserService_Refresh(t *testing.T) {
 		{
 			name:         "repository error with user returned",
 			refreshToken: "valid_refresh_token",
-			setupMocks: func(userRepo *ports.MockUserRepository, hasher *ports.MockPasswordHasher, tokenManager *ports.MockTokenManager) {
+			setupMocks: func(
+				userRepo *ports.MockUserRepository,
+				hasher *ports.MockPasswordHasher,
+				tokenManager *ports.MockTokenManager,
+				validator *ports.MockValidationService,
+			) {
 				tokenManager.EXPECT().ValidateRefreshToken("valid_refresh_token").Return("user-id", nil)
 				user := &domain.User{
 					ID:    "user-id",
@@ -431,10 +552,11 @@ func TestUserService_Refresh(t *testing.T) {
 			userRepo := ports.NewMockUserRepository(ctrl)
 			hasher := ports.NewMockPasswordHasher(ctrl)
 			tokenManager := ports.NewMockTokenManager(ctrl)
+			validator := ports.NewMockValidationService(ctrl)
 
-			tt.setupMocks(userRepo, hasher, tokenManager)
+			tt.setupMocks(userRepo, hasher, tokenManager, validator)
 
-			service := NewUserService(userRepo, hasher, tokenManager)
+			service := NewUserService(userRepo, hasher, tokenManager, validator)
 			tokenPair, err := service.Refresh(context.Background(), tt.refreshToken)
 
 			if tt.expectedError != nil {
@@ -455,7 +577,7 @@ func TestUserService_ValidateToken(t *testing.T) {
 		name           string
 		branch         string
 		accessToken    string
-		setupMocks     func(*ports.MockUserRepository, *ports.MockPasswordHasher, *ports.MockTokenManager)
+		setupMocks     func(*ports.MockUserRepository, *ports.MockPasswordHasher, *ports.MockTokenManager, *ports.MockValidationService)
 		expectedError  error
 		validateResult func(*testing.T, *domain.Claims, error)
 	}{
@@ -463,7 +585,12 @@ func TestUserService_ValidateToken(t *testing.T) {
 			name:        "success",
 			branch:      "Success path",
 			accessToken: "valid_access_token",
-			setupMocks: func(userRepo *ports.MockUserRepository, hasher *ports.MockPasswordHasher, tokenManager *ports.MockTokenManager) {
+			setupMocks: func(
+				userRepo *ports.MockUserRepository,
+				hasher *ports.MockPasswordHasher,
+				tokenManager *ports.MockTokenManager,
+				validator *ports.MockValidationService,
+			) {
 				claims := &domain.Claims{
 					UserID: "user-id",
 					Role:   "user",
@@ -482,7 +609,12 @@ func TestUserService_ValidateToken(t *testing.T) {
 			name:        "invalid token",
 			branch:      "Invalid Token",
 			accessToken: "invalid_token",
-			setupMocks: func(userRepo *ports.MockUserRepository, hasher *ports.MockPasswordHasher, tokenManager *ports.MockTokenManager) {
+			setupMocks: func(
+				userRepo *ports.MockUserRepository,
+				hasher *ports.MockPasswordHasher,
+				tokenManager *ports.MockTokenManager,
+				validator *ports.MockValidationService,
+			) {
 				tokenManager.EXPECT().Parse("invalid_token").Return(nil, errors.New("token parse error"))
 			},
 			expectedError: coreerrors.ErrInvalidToken,
@@ -495,7 +627,12 @@ func TestUserService_ValidateToken(t *testing.T) {
 		{
 			name:        "expired token",
 			accessToken: "expired_token",
-			setupMocks: func(userRepo *ports.MockUserRepository, hasher *ports.MockPasswordHasher, tokenManager *ports.MockTokenManager) {
+			setupMocks: func(
+				userRepo *ports.MockUserRepository,
+				hasher *ports.MockPasswordHasher,
+				tokenManager *ports.MockTokenManager,
+				validator *ports.MockValidationService,
+			) {
 				tokenManager.EXPECT().Parse("expired_token").Return(nil, errors.New("token expired"))
 			},
 			expectedError: coreerrors.ErrInvalidToken,
@@ -515,10 +652,11 @@ func TestUserService_ValidateToken(t *testing.T) {
 			userRepo := ports.NewMockUserRepository(ctrl)
 			hasher := ports.NewMockPasswordHasher(ctrl)
 			tokenManager := ports.NewMockTokenManager(ctrl)
+			validator := ports.NewMockValidationService(ctrl)
 
-			tt.setupMocks(userRepo, hasher, tokenManager)
+			tt.setupMocks(userRepo, hasher, tokenManager, validator)
 
-			service := NewUserService(userRepo, hasher, tokenManager)
+			service := NewUserService(userRepo, hasher, tokenManager, validator)
 			claims, err := service.ValidateToken(context.Background(), tt.accessToken)
 
 			if tt.expectedError != nil {
