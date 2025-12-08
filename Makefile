@@ -1,13 +1,13 @@
-REPORT_FILE := TEST_REPORT.txt
+REPORT_FILE := tests/TEST_REPORT.txt
 MUTATION_IMAGE := codex-auth-mutation
-MUTATION_DOCKERFILE := Dockerfile.mutation
+MUTATION_DOCKERFILE := tests/Dockerfile.mutation
 
 .PHONY: test test-all clean-report
 
 test: clean-report run-tests
 
 clean-report:
-	@rm -f $(REPORT_FILE)
+	@rm -f $(REPORT_FILE) || true
 	@touch $(REPORT_FILE)
 
 run-tests:
@@ -26,7 +26,7 @@ run-tests:
 	@echo "  - Service Logic: White Box Testing (branch testing with mocks)" >> $(REPORT_FILE)
 	@echo "  - Adapters: White Box Testing (statement testing)" >> $(REPORT_FILE)
 	@echo "--------------------------------------------------" >> $(REPORT_FILE)
-	@if go test -v ./... >> $(REPORT_FILE) 2>&1; then \
+	@if go test -v -tags=!integration ./... >> $(REPORT_FILE) 2>&1; then \
 		echo "RESULT: SUCCESS" | tee -a $(REPORT_FILE); \
 	else \
 		echo "RESULT: FAILED" | tee -a $(REPORT_FILE); \
@@ -72,3 +72,20 @@ run-tests:
 		echo "RESULT: WARNING (Some Mutants Survived)" | tee -a $(REPORT_FILE); \
 	fi
 	@echo "" >> $(REPORT_FILE)
+
+	@# ------------------------------------------------------------------
+	@# INTEGRATION TESTS
+	@# ------------------------------------------------------------------
+	@echo "INTEGRATION TESTING" | tee -a $(REPORT_FILE)
+	@echo "Description:" >> $(REPORT_FILE)
+	@echo "  - Tool: cucumber/godog" >> $(REPORT_FILE)
+	@echo "  - BDD Testing" >> $(REPORT_FILE)
+	@echo "--------------------------------------------------" >> $(REPORT_FILE)
+	@if go test -tags=integration ./tests/bdd -v >> $(REPORT_FILE) 2>&1; then \
+		echo "RESULT: SUCCESS" | tee -a $(REPORT_FILE); \
+	else \
+		echo "RESULT: FAILED" | tee -a $(REPORT_FILE); \
+		echo "Integration tests failed. See details above." >> $(REPORT_FILE); \
+		exit 1; \
+	fi
+	@echo "" >> $(REPORT_FILE)	

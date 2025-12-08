@@ -30,3 +30,7 @@ go.work.sum
 # Editor/IDE
 # .idea/
 # .vscode/
+
+# Test report
+TEST_REPORT.txt
+test/TEST_REPORT.txt

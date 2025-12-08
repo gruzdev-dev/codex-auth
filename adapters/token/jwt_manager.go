@@ -1,6 +1,7 @@
 package token
 
 import (
+	"fmt"
 	"time"
 
 	"codex-auth/core/domain"
@@ -30,6 +31,7 @@ func (m *JWTManager) NewPair(userID, role string) (*domain.TokenPair, error) {
 		"role": role,
 		"exp":  now.Add(m.tokenTTL).Unix(),
 		"iat":  now.Unix(),
+		"jti":  fmt.Sprintf("%s-%d-%d", userID, now.UnixNano(), now.Nanosecond()),
 	}
 
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
@@ -43,6 +45,7 @@ func (m *JWTManager) NewPair(userID, role string) (*domain.TokenPair, error) {
 		"type": "refresh",
 		"exp":  now.Add(30 * 24 * time.Hour).Unix(),
 		"iat":  now.Unix(),
+		"jti":  fmt.Sprintf("%s-refresh-%d-%d", userID, now.UnixNano(), now.Nanosecond()),
 	}
 
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
