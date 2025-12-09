@@ -1,8 +1,6 @@
 module codex-auth
 
-go 1.25.0
-
-toolchain go1.25.1
+go 1.25.5
 
 require (
 	github.com/cucumber/godog v0.15.1

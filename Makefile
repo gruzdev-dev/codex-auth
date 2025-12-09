@@ -1,8 +1,11 @@
 REPORT_FILE := tests/TEST_REPORT.txt
 MUTATION_IMAGE := codex-auth-mutation
 MUTATION_DOCKERFILE := tests/Dockerfile.mutation
+SONAR_IMAGE := sonarsource/sonar-scanner-cli
+SONAR_PROJECT := codex-auth
+SONAR_TOKEN := sqp_a6787808e65d5c4ad38c62f60858dae3c19f3f15
 
-.PHONY: test test-all clean-report
+.PHONY: test test-all clean-report sonar-up sonar-down sonar-run lint
 
 test: clean-report run-tests
 
@@ -89,3 +92,40 @@ run-tests:
 		exit 1; \
 	fi
 	@echo "" >> $(REPORT_FILE)	
+
+	@# ------------------------------------------------------------------
+	@# LINTING
+	@# ------------------------------------------------------------------
+	@echo "LINTING" | tee -a $(REPORT_FILE)
+	@echo "Description:" >> $(REPORT_FILE)
+	@echo "  - Tool: golangci-lint" >> $(REPORT_FILE)
+	@echo "  - Scope: All code" >> $(REPORT_FILE)
+	@echo "--------------------------------------------------" >> $(REPORT_FILE)
+	@if make lint >> $(REPORT_FILE) 2>&1; then \
+		echo "RESULT: SUCCESS" | tee -a $(REPORT_FILE); \
+	else \
+		echo "RESULT: FAILED" | tee -a $(REPORT_FILE); \
+		echo "Linting failed. See details above." >> $(REPORT_FILE); \
+		exit 1; \
+	fi
+	@echo "" >> $(REPORT_FILE)
+
+sonar-up:
+	docker compose -f tests/docker-compose.sonarqube.yml up -d
+
+sonar-down:
+	docker compose -f tests/docker-compose.sonarqube.yml down
+
+sonar-run:
+	docker run \
+		--rm \
+		--network="host" \
+		-v "$(CURDIR):/usr/src" \
+		$(SONAR_IMAGE) \
+		-Dsonar.projectKey=$(SONAR_PROJECT) \
+		-Dsonar.sources=. \
+		-Dsonar.host.url=http://localhost:9000 \
+		-Dsonar.token=$(SONAR_TOKEN)
+
+make lint:
+	golangci-lint run ./...
