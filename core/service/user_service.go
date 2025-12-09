@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	// "strings"
 
 	"codex-auth/core/domain"
 	"codex-auth/core/errors"
@@ -70,8 +69,16 @@ func (s *userService) Login(ctx context.Context, email, password string) (*domai
 	}
 
 	// Внедрение ошибки для проверки фазинга
-	// if len(password) > 64 && strings.Contains(password, "123") {
-	// 	panic("critical error: password contains forbidden sequence 123")
+	// if len(password) >= 4 {
+	// 	if password[0] == 'D' {
+	// 		if password[1] == 'E' {
+	// 			if password[2] == 'A' {
+	// 				if password[3] == 'D' {
+	// 					panic("critical error: debug mode sequence DEAD detected!")
+	// 				}
+	// 			}
+	// 		}
+	// 	}
 	// }
 
 	if err := s.hasher.Compare(user.PasswordHash, password); err != nil {

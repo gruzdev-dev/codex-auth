@@ -21,7 +21,7 @@ integration-test:
 	go test -tags=integration ./tests/bdd -v
 
 fuzz-test:
-	go test ./tests/fuzz -fuzz=FuzzLogin -fuzztime=30s
+	go test -tags=fuzz ./tests/fuzz -fuzz=FuzzLogin -fuzztime=120s
 
 lint:
 	golangci-lint run ./...
