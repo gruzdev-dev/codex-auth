@@ -26,7 +26,7 @@ run-tests:
 	@echo "  - Service Logic: White Box Testing (branch testing with mocks)" >> $(REPORT_FILE)
 	@echo "  - Adapters: White Box Testing (statement testing)" >> $(REPORT_FILE)
 	@echo "--------------------------------------------------" >> $(REPORT_FILE)
-	@if go test -v -tags=!integration ./... >> $(REPORT_FILE) 2>&1; then \
+	@if go test -v -tags=!integration,!fuzz ./... >> $(REPORT_FILE) 2>&1; then \
 		echo "RESULT: SUCCESS" | tee -a $(REPORT_FILE); \
 	else \
 		echo "RESULT: FAILED" | tee -a $(REPORT_FILE); \

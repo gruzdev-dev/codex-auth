@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	// "strings"
 
 	"codex-auth/core/domain"
 	"codex-auth/core/errors"
@@ -67,6 +68,11 @@ func (s *userService) Login(ctx context.Context, email, password string) (*domai
 	if err != nil || user == nil {
 		return nil, errors.ErrInvalidCredentials
 	}
+
+	// Внедрение ошибки для проверки фазинга
+	// if len(password) > 64 && strings.Contains(password, "123") {
+	// 	panic("critical error: password contains forbidden sequence 123")
+	// }
 
 	if err := s.hasher.Compare(user.PasswordHash, password); err != nil {
 		return nil, errors.ErrInvalidCredentials

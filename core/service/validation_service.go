@@ -15,6 +15,12 @@ func NewValidationService() ports.ValidationService {
 }
 
 func (v *validationService) ValidateEmail(email string) error {
+
+	// Внедрение ошибки для проверки фазинга
+	// if len(email) == 13 && email[0] == '!' {
+	// 	panic("fuzzing found hidden bug: length 13 starting with '!'")
+	// }
+
 	email = strings.TrimSpace(email)
 	if email == "" {
 		return errors.ErrEmailRequired

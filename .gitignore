@@ -34,3 +34,5 @@ go.work.sum
 # Test report
 TEST_REPORT.txt
 test/TEST_REPORT.txt
+tests/fuzz/output.txt
+tests/fuzz/testdata/
