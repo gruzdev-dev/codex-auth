@@ -7,9 +7,13 @@ import (
 )
 
 type Config struct {
-	DatabaseURL string `yaml:"database_url"`
-	JWTSecret   string `yaml:"jwt_secret"`
-	Server      struct {
+	DatabaseURL      string `yaml:"database_url"`
+	JWTSecret        string `yaml:"jwt_secret"`
+	InternalSecret   string `yaml:"internal_secret"`
+	DocumentsService struct {
+		Addr string `yaml:"addr"`
+	} `yaml:"documents_service"`
+	Server struct {
 		Port string `yaml:"port"`
 	} `yaml:"server"`
 }
@@ -35,6 +39,14 @@ func NewConfig() (*Config, error) {
 
 	if envJWTSecret := os.Getenv("JWT_SECRET"); envJWTSecret != "" {
 		cfg.JWTSecret = envJWTSecret
+	}
+
+	if envInternalSecret := os.Getenv("INTERNAL_SERVICE_SECRET"); envInternalSecret != "" {
+		cfg.InternalSecret = envInternalSecret
+	}
+
+	if envDocumentsAddr := os.Getenv("DOCUMENTS_SERVICE_ADDR"); envDocumentsAddr != "" {
+		cfg.DocumentsService.Addr = envDocumentsAddr
 	}
 
 	return &cfg, nil

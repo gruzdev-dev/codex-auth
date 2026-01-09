@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	documentsAdapter "codex-auth/adapters/clients/documents"
 	hasherAdapter "codex-auth/adapters/hasher"
 	httpAdapter "codex-auth/adapters/http"
 	postgresAdapter "codex-auth/adapters/storage/postgres"
@@ -15,6 +16,8 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/dig"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func BuildContainer() (*dig.Container, error) {
@@ -44,6 +47,10 @@ func BuildContainer() (*dig.Container, error) {
 		return nil, err
 	}
 
+	if err := container.Provide(newDocumentsClient, dig.As(new(ports.ProfileProvider))); err != nil {
+		return nil, err
+	}
+
 	if err := container.Provide(service.NewUserService, dig.As(new(ports.AuthService))); err != nil {
 		return nil, err
 	}
@@ -70,4 +77,12 @@ func newDBPool(cfg *configs.Config) (*pgxpool.Pool, error) {
 
 func newTokenManager(cfg *configs.Config) (ports.TokenManager, error) {
 	return tokenAdapter.NewJWTManager(cfg.JWTSecret, 15*time.Minute), nil
+}
+
+func newDocumentsClient(cfg *configs.Config) (ports.ProfileProvider, error) {
+	conn, err := grpc.NewClient(cfg.DocumentsService.Addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return nil, err
+	}
+	return documentsAdapter.NewClient(conn, cfg.InternalSecret), nil
 }

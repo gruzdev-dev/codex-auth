@@ -247,18 +247,18 @@ func (m *MockTokenManager) EXPECT() *MockTokenManagerMockRecorder {
 }
 
 // NewPair mocks base method.
-func (m *MockTokenManager) NewPair(userID, role string) (*domain.TokenPair, error) {
+func (m *MockTokenManager) NewPair(user *domain.User) (*domain.TokenPair, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "NewPair", userID, role)
+	ret := m.ctrl.Call(m, "NewPair", user)
 	ret0, _ := ret[0].(*domain.TokenPair)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // NewPair indicates an expected call of NewPair.
-func (mr *MockTokenManagerMockRecorder) NewPair(userID, role any) *gomock.Call {
+func (mr *MockTokenManagerMockRecorder) NewPair(user any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewPair", reflect.TypeOf((*MockTokenManager)(nil).NewPair), userID, role)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewPair", reflect.TypeOf((*MockTokenManager)(nil).NewPair), user)
 }
 
 // Parse mocks base method.

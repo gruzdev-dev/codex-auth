@@ -19,8 +19,8 @@ import (
 	authHttp "codex-auth/adapters/http"
 	"codex-auth/adapters/storage/postgres"
 	"codex-auth/adapters/token"
-	"codex-auth/core/service"
 	"codex-auth/core/ports"
+	"codex-auth/core/service"
 )
 
 type performanceTestState struct {
@@ -60,7 +60,8 @@ func (t *performanceTestState) iSwitchAlgorithm(algo string) error {
 	}
 
 	validator := service.NewValidationService()
-	svc := service.NewUserService(repo, h, tm, validator)
+	profileProvider := &noopProfileProvider{}
+	svc := service.NewUserService(repo, h, tm, validator, profileProvider)
 	handler := authHttp.NewHandler(svc)
 
 	t.router = mux.NewRouter()
@@ -140,7 +141,7 @@ func (t *performanceTestState) executionTimeShouldNotExceed(minutes int) error {
 	}
 
 	fmt.Printf("[TIME] Execution: %v, limit: %v\n", t.lastRunDuration, limit)
-	
+
 	return nil
 }
 

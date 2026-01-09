@@ -19,7 +19,7 @@ func TestUserService_Register(t *testing.T) {
 		name           string
 		email          string
 		password       string
-		setupMocks     func(*ports.MockUserRepository, *ports.MockPasswordHasher, *ports.MockTokenManager, *ports.MockValidationService)
+		setupMocks     func(*ports.MockUserRepository, *ports.MockPasswordHasher, *ports.MockTokenManager, *ports.MockValidationService, *ports.MockProfileProvider)
 		expectedError  error
 		validateResult func(*testing.T, *domain.User, error)
 	}{
@@ -32,18 +32,23 @@ func TestUserService_Register(t *testing.T) {
 				hasher *ports.MockPasswordHasher,
 				tokenManager *ports.MockTokenManager,
 				validator *ports.MockValidationService,
+				profileProvider *ports.MockProfileProvider,
 			) {
+				validator.EXPECT().ValidateEmail("test@example.com").Return(nil)
+				validator.EXPECT().ValidatePassword("password123").Return(nil)
 				userRepo.EXPECT().GetByEmail(gomock.Any(), "test@example.com").Return(nil, coreerrors.ErrUserNotFound)
+				profileProvider.EXPECT().GetExtraClaims(gomock.Any(), "test@example.com").Return(map[string]string{"patient_id": "patient-123", "scopes": "patient/*.read"}, nil)
 				hasher.EXPECT().Hash("password123").Return("hashed_password", nil)
 				userRepo.EXPECT().Save(gomock.Any(), gomock.Any()).DoAndReturn(func(ctx context.Context, user *domain.User) error {
 					require.NotEmpty(t, user.ID)
 					require.Equal(t, "test@example.com", user.Email)
 					require.Equal(t, "hashed_password", user.PasswordHash)
 					require.Equal(t, "user", user.Role)
+					require.NotNil(t, user.Metadata)
+					require.Equal(t, "patient-123", user.Metadata["patient_id"])
+					require.Equal(t, "patient/*.read", user.Metadata["scopes"])
 					return nil
 				})
-				validator.EXPECT().ValidateEmail("test@example.com").Return(nil)
-				validator.EXPECT().ValidatePassword("password123").Return(nil)
 			},
 			expectedError: nil,
 			validateResult: func(t *testing.T, user *domain.User, err error) {
@@ -63,11 +68,12 @@ func TestUserService_Register(t *testing.T) {
 				hasher *ports.MockPasswordHasher,
 				tokenManager *ports.MockTokenManager,
 				validator *ports.MockValidationService,
+				profileProvider *ports.MockProfileProvider,
 			) {
-				existingUser := &domain.User{Email: "existing@example.com"}
-				userRepo.EXPECT().GetByEmail(gomock.Any(), "existing@example.com").Return(existingUser, nil)
 				validator.EXPECT().ValidateEmail("existing@example.com").Return(nil)
 				validator.EXPECT().ValidatePassword("password123").Return(nil)
+				existingUser := &domain.User{Email: "existing@example.com", Metadata: make(map[string]string)}
+				userRepo.EXPECT().GetByEmail(gomock.Any(), "existing@example.com").Return(existingUser, nil)
 			},
 			expectedError: coreerrors.ErrUserAlreadyExists,
 			validateResult: func(t *testing.T, user *domain.User, err error) {
@@ -85,10 +91,11 @@ func TestUserService_Register(t *testing.T) {
 				hasher *ports.MockPasswordHasher,
 				tokenManager *ports.MockTokenManager,
 				validator *ports.MockValidationService,
+				profileProvider *ports.MockProfileProvider,
 			) {
-				userRepo.EXPECT().GetByEmail(gomock.Any(), "test@example.com").Return(nil, errors.New("database error"))
 				validator.EXPECT().ValidateEmail("test@example.com").Return(nil)
 				validator.EXPECT().ValidatePassword("password123").Return(nil)
+				userRepo.EXPECT().GetByEmail(gomock.Any(), "test@example.com").Return(nil, errors.New("database error"))
 			},
 			expectedError: errors.New("database error"),
 			validateResult: func(t *testing.T, user *domain.User, err error) {
@@ -106,11 +113,13 @@ func TestUserService_Register(t *testing.T) {
 				hasher *ports.MockPasswordHasher,
 				tokenManager *ports.MockTokenManager,
 				validator *ports.MockValidationService,
+				profileProvider *ports.MockProfileProvider,
 			) {
-				userRepo.EXPECT().GetByEmail(gomock.Any(), "test@example.com").Return(nil, coreerrors.ErrUserNotFound)
-				hasher.EXPECT().Hash("password123").Return("", errors.New("hashing failed"))
 				validator.EXPECT().ValidateEmail("test@example.com").Return(nil)
 				validator.EXPECT().ValidatePassword("password123").Return(nil)
+				userRepo.EXPECT().GetByEmail(gomock.Any(), "test@example.com").Return(nil, coreerrors.ErrUserNotFound)
+				profileProvider.EXPECT().GetExtraClaims(gomock.Any(), "test@example.com").Return(map[string]string{"patient_id": "patient-123"}, nil)
+				hasher.EXPECT().Hash("password123").Return("", errors.New("hashing failed"))
 			},
 			expectedError: errors.New("hashing failed"),
 			validateResult: func(t *testing.T, user *domain.User, err error) {
@@ -128,12 +137,14 @@ func TestUserService_Register(t *testing.T) {
 				hasher *ports.MockPasswordHasher,
 				tokenManager *ports.MockTokenManager,
 				validator *ports.MockValidationService,
+				profileProvider *ports.MockProfileProvider,
 			) {
-				userRepo.EXPECT().GetByEmail(gomock.Any(), "test@example.com").Return(nil, coreerrors.ErrUserNotFound)
-				hasher.EXPECT().Hash("password123").Return("hashed_password", nil)
-				userRepo.EXPECT().Save(gomock.Any(), gomock.Any()).Return(errors.New("save failed"))
 				validator.EXPECT().ValidateEmail("test@example.com").Return(nil)
 				validator.EXPECT().ValidatePassword("password123").Return(nil)
+				userRepo.EXPECT().GetByEmail(gomock.Any(), "test@example.com").Return(nil, coreerrors.ErrUserNotFound)
+				profileProvider.EXPECT().GetExtraClaims(gomock.Any(), "test@example.com").Return(map[string]string{"patient_id": "patient-123"}, nil)
+				hasher.EXPECT().Hash("password123").Return("hashed_password", nil)
+				userRepo.EXPECT().Save(gomock.Any(), gomock.Any()).Return(errors.New("save failed"))
 			},
 			expectedError: errors.New("save failed"),
 			validateResult: func(t *testing.T, user *domain.User, err error) {
@@ -151,6 +162,7 @@ func TestUserService_Register(t *testing.T) {
 				hasher *ports.MockPasswordHasher,
 				tokenManager *ports.MockTokenManager,
 				validator *ports.MockValidationService,
+				profileProvider *ports.MockProfileProvider,
 			) {
 				validator.EXPECT().ValidateEmail("invalid-email").Return(coreerrors.ErrInvalidEmailFormat)
 			},
@@ -170,6 +182,7 @@ func TestUserService_Register(t *testing.T) {
 				hasher *ports.MockPasswordHasher,
 				tokenManager *ports.MockTokenManager,
 				validator *ports.MockValidationService,
+				profileProvider *ports.MockProfileProvider,
 			) {
 				validator.EXPECT().ValidateEmail("test@example.com").Return(nil)
 				validator.EXPECT().ValidatePassword("bad").Return(coreerrors.ErrPasswordTooShort)
@@ -179,6 +192,29 @@ func TestUserService_Register(t *testing.T) {
 				assert.Error(t, err)
 				assert.Nil(t, user)
 				assert.Equal(t, coreerrors.ErrPasswordTooShort, err)
+			},
+		},
+		{
+			name:     "GetExtraClaims error",
+			email:    "test@example.com",
+			password: "password123",
+			setupMocks: func(
+				userRepo *ports.MockUserRepository,
+				hasher *ports.MockPasswordHasher,
+				tokenManager *ports.MockTokenManager,
+				validator *ports.MockValidationService,
+				profileProvider *ports.MockProfileProvider,
+			) {
+				validator.EXPECT().ValidateEmail("test@example.com").Return(nil)
+				validator.EXPECT().ValidatePassword("password123").Return(nil)
+				userRepo.EXPECT().GetByEmail(gomock.Any(), "test@example.com").Return(nil, coreerrors.ErrUserNotFound)
+				profileProvider.EXPECT().GetExtraClaims(gomock.Any(), "test@example.com").Return(nil, errors.New("documents service error"))
+			},
+			expectedError: errors.New("documents service error"),
+			validateResult: func(t *testing.T, user *domain.User, err error) {
+				assert.Error(t, err)
+				assert.Nil(t, user)
+				assert.Equal(t, "documents service error", err.Error())
 			},
 		},
 	}
@@ -193,9 +229,11 @@ func TestUserService_Register(t *testing.T) {
 			tokenManager := ports.NewMockTokenManager(ctrl)
 			validator := ports.NewMockValidationService(ctrl)
 
-			tt.setupMocks(userRepo, hasher, tokenManager, validator)
+			profileProvider := ports.NewMockProfileProvider(ctrl)
 
-			service := NewUserService(userRepo, hasher, tokenManager, validator)
+			tt.setupMocks(userRepo, hasher, tokenManager, validator, profileProvider)
+
+			service := NewUserService(userRepo, hasher, tokenManager, validator, profileProvider)
 			user, err := service.Register(context.Background(), tt.email, tt.password)
 
 			if tt.expectedError != nil {
@@ -236,6 +274,7 @@ func TestUserService_Login(t *testing.T) {
 					Email:        "test@example.com",
 					PasswordHash: "hashed_password",
 					Role:         "user",
+					Metadata:     make(map[string]string),
 				}
 				userRepo.EXPECT().GetByEmail(gomock.Any(), "test@example.com").Return(user, nil)
 				hasher.EXPECT().Compare("hashed_password", "password123").Return(nil)
@@ -243,7 +282,11 @@ func TestUserService_Login(t *testing.T) {
 					AccessToken:  "access_token",
 					RefreshToken: "refresh_token",
 				}
-				tokenManager.EXPECT().NewPair("user-id", "user").Return(tokenPair, nil)
+				tokenManager.EXPECT().NewPair(gomock.Any()).DoAndReturn(func(u *domain.User) (*domain.TokenPair, error) {
+					require.Equal(t, user.ID, u.ID)
+					require.Equal(t, user.Role, u.Role)
+					return tokenPair, nil
+				})
 			},
 			expectedError: nil,
 			validateResult: func(t *testing.T, tokenPair *domain.TokenPair, err error) {
@@ -306,6 +349,7 @@ func TestUserService_Login(t *testing.T) {
 					Email:        "test@example.com",
 					PasswordHash: "hashed_password",
 					Role:         "user",
+					Metadata:     make(map[string]string),
 				}
 				userRepo.EXPECT().GetByEmail(gomock.Any(), "test@example.com").Return(user, nil)
 				hasher.EXPECT().Compare("hashed_password", "wrong_password").Return(errors.New("password mismatch"))
@@ -332,10 +376,11 @@ func TestUserService_Login(t *testing.T) {
 					Email:        "test@example.com",
 					PasswordHash: "hashed_password",
 					Role:         "user",
+					Metadata:     make(map[string]string),
 				}
 				userRepo.EXPECT().GetByEmail(gomock.Any(), "test@example.com").Return(user, nil)
 				hasher.EXPECT().Compare("hashed_password", "password123").Return(nil)
-				tokenManager.EXPECT().NewPair("user-id", "user").Return(nil, errors.New("token generation failed"))
+				tokenManager.EXPECT().NewPair(gomock.Any()).Return(nil, errors.New("token generation failed"))
 			},
 			expectedError: errors.New("token generation failed"),
 			validateResult: func(t *testing.T, tokenPair *domain.TokenPair, err error) {
@@ -359,6 +404,7 @@ func TestUserService_Login(t *testing.T) {
 					Email:        "test@example.com",
 					PasswordHash: "hashed_password",
 					Role:         "user",
+					Metadata:     make(map[string]string),
 				}
 				userRepo.EXPECT().GetByEmail(gomock.Any(), "test@example.com").Return(user, errors.New("database error"))
 			},
@@ -380,10 +426,11 @@ func TestUserService_Login(t *testing.T) {
 			hasher := ports.NewMockPasswordHasher(ctrl)
 			tokenManager := ports.NewMockTokenManager(ctrl)
 			validator := ports.NewMockValidationService(ctrl)
+			profileProvider := ports.NewMockProfileProvider(ctrl)
 
 			tt.setupMocks(userRepo, hasher, tokenManager, validator)
 
-			service := NewUserService(userRepo, hasher, tokenManager, validator)
+			service := NewUserService(userRepo, hasher, tokenManager, validator, profileProvider)
 			tokenPair, err := service.Login(context.Background(), tt.email, tt.password)
 
 			if tt.expectedError != nil {
@@ -418,16 +465,21 @@ func TestUserService_Refresh(t *testing.T) {
 			) {
 				tokenManager.EXPECT().ValidateRefreshToken("valid_refresh_token").Return("user-id", nil)
 				user := &domain.User{
-					ID:    "user-id",
-					Email: "test@example.com",
-					Role:  "user",
+					ID:       "user-id",
+					Email:    "test@example.com",
+					Role:     "user",
+					Metadata: make(map[string]string),
 				}
 				userRepo.EXPECT().GetByID(gomock.Any(), "user-id").Return(user, nil)
 				tokenPair := &domain.TokenPair{
 					AccessToken:  "new_access_token",
 					RefreshToken: "new_refresh_token",
 				}
-				tokenManager.EXPECT().NewPair("user-id", "user").Return(tokenPair, nil)
+				tokenManager.EXPECT().NewPair(gomock.Any()).DoAndReturn(func(u *domain.User) (*domain.TokenPair, error) {
+					require.Equal(t, user.ID, u.ID)
+					require.Equal(t, user.Role, u.Role)
+					return tokenPair, nil
+				})
 			},
 			expectedError: nil,
 			validateResult: func(t *testing.T, tokenPair *domain.TokenPair, err error) {
@@ -504,12 +556,13 @@ func TestUserService_Refresh(t *testing.T) {
 			) {
 				tokenManager.EXPECT().ValidateRefreshToken("valid_refresh_token").Return("user-id", nil)
 				user := &domain.User{
-					ID:    "user-id",
-					Email: "test@example.com",
-					Role:  "user",
+					ID:       "user-id",
+					Email:    "test@example.com",
+					Role:     "user",
+					Metadata: make(map[string]string),
 				}
 				userRepo.EXPECT().GetByID(gomock.Any(), "user-id").Return(user, nil)
-				tokenManager.EXPECT().NewPair("user-id", "user").Return(nil, errors.New("token generation failed"))
+				tokenManager.EXPECT().NewPair(gomock.Any()).Return(nil, errors.New("token generation failed"))
 			},
 			expectedError: errors.New("token generation failed"),
 			validateResult: func(t *testing.T, tokenPair *domain.TokenPair, err error) {
@@ -529,9 +582,10 @@ func TestUserService_Refresh(t *testing.T) {
 			) {
 				tokenManager.EXPECT().ValidateRefreshToken("valid_refresh_token").Return("user-id", nil)
 				user := &domain.User{
-					ID:    "user-id",
-					Email: "test@example.com",
-					Role:  "user",
+					ID:       "user-id",
+					Email:    "test@example.com",
+					Role:     "user",
+					Metadata: make(map[string]string),
 				}
 				userRepo.EXPECT().GetByID(gomock.Any(), "user-id").Return(user, errors.New("database error"))
 			},
@@ -553,10 +607,11 @@ func TestUserService_Refresh(t *testing.T) {
 			hasher := ports.NewMockPasswordHasher(ctrl)
 			tokenManager := ports.NewMockTokenManager(ctrl)
 			validator := ports.NewMockValidationService(ctrl)
+			profileProvider := ports.NewMockProfileProvider(ctrl)
 
 			tt.setupMocks(userRepo, hasher, tokenManager, validator)
 
-			service := NewUserService(userRepo, hasher, tokenManager, validator)
+			service := NewUserService(userRepo, hasher, tokenManager, validator, profileProvider)
 			tokenPair, err := service.Refresh(context.Background(), tt.refreshToken)
 
 			if tt.expectedError != nil {
@@ -653,10 +708,11 @@ func TestUserService_ValidateToken(t *testing.T) {
 			hasher := ports.NewMockPasswordHasher(ctrl)
 			tokenManager := ports.NewMockTokenManager(ctrl)
 			validator := ports.NewMockValidationService(ctrl)
+			profileProvider := ports.NewMockProfileProvider(ctrl)
 
 			tt.setupMocks(userRepo, hasher, tokenManager, validator)
 
-			service := NewUserService(userRepo, hasher, tokenManager, validator)
+			service := NewUserService(userRepo, hasher, tokenManager, validator, profileProvider)
 			claims, err := service.ValidateToken(context.Background(), tt.accessToken)
 
 			if tt.expectedError != nil {

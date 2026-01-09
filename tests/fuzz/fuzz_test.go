@@ -76,6 +76,7 @@ func FuzzLogin(f *testing.F) {
 				Email:        email,
 				PasswordHash: "hashed_password",
 				Role:         "user",
+				Metadata:     make(map[string]string),
 			}
 			userRepo.EXPECT().GetByEmail(gomock.Any(), email).Return(user, nil)
 			hasher.EXPECT().Compare("hashed_password", password).Return(errors.New("password mismatch"))
@@ -83,7 +84,8 @@ func FuzzLogin(f *testing.F) {
 			userRepo.EXPECT().GetByEmail(gomock.Any(), email).Return(nil, coreerrors.ErrUserNotFound)
 		}
 
-		service := service.NewUserService(userRepo, hasher, tokenManager, validator)
+		profileProvider := ports.NewMockProfileProvider(ctrl)
+		service := service.NewUserService(userRepo, hasher, tokenManager, validator, profileProvider)
 		_, _ = service.Login(context.Background(), email, password)
 	})
 }

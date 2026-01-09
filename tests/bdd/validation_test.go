@@ -33,8 +33,9 @@ func newValidationTestState() *validationTestState {
 	hash := hasher.NewBcryptHasher()
 	tm := token.NewJWTManager("val-secret", 15*time.Minute)
 	validator := service.NewValidationService()
+	profileProvider := &noopProfileProvider{}
 
-	svc := service.NewUserService(repo, hash, tm, validator)
+	svc := service.NewUserService(repo, hash, tm, validator, profileProvider)
 	handler := authHttp.NewHandler(svc)
 
 	router := mux.NewRouter()

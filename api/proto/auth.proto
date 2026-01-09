@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "codex-documents/api/proto";
+
+service AuthIntegration {
+  rpc CreatePatient (CreatePatientRequest) returns (CreatePatientResponse);
+}
+
+message CreatePatientRequest {
+  string email = 1;
+}
+
+message CreatePatientResponse {
+  string patient_id = 1;
+  repeated string scopes = 2;
+}

@@ -17,6 +17,7 @@ func TestNewUser_EquivalencePartitioning(t *testing.T) {
 		email         string
 		passwordHash  string
 		role          string
+		metadata      map[string]string
 		expectedError error
 		validate      func(t *testing.T, user *User, err error)
 	}{
@@ -36,6 +37,8 @@ func TestNewUser_EquivalencePartitioning(t *testing.T) {
 				_, parseErr := uuid.Parse(user.ID)
 				assert.NoError(t, parseErr)
 				assert.WithinDuration(t, time.Now(), user.CreatedAt, time.Second)
+				assert.NotNil(t, user.Metadata)
+				assert.Empty(t, user.Metadata)
 			},
 		},
 		{
@@ -48,6 +51,8 @@ func TestNewUser_EquivalencePartitioning(t *testing.T) {
 				require.NoError(t, err)
 				require.NotNil(t, user)
 				assert.Equal(t, "admin", user.Role)
+				assert.NotNil(t, user.Metadata)
+				assert.Empty(t, user.Metadata)
 			},
 		},
 		{
@@ -110,11 +115,43 @@ func TestNewUser_EquivalencePartitioning(t *testing.T) {
 				assert.Equal(t, errors.ErrInvalidUser, err)
 			},
 		},
+		{
+			name:          "User with metadata",
+			email:         "a@b.c",
+			passwordHash:  "12345678",
+			role:          "user",
+			metadata:      nil,
+			expectedError: nil,
+			validate: func(t *testing.T, user *User, err error) {
+				require.NoError(t, err)
+				require.NotNil(t, user)
+				assert.NotNil(t, user.Metadata)
+				assert.Empty(t, user.Metadata)
+			},
+		},
+		{
+			name:         "User with provided metadata",
+			email:        "a@b.c",
+			passwordHash: "12345678",
+			role:         "user",
+			metadata: map[string]string{
+				"patient_id": "patient-123",
+				"scopes":     "patient/*.read",
+			},
+			expectedError: nil,
+			validate: func(t *testing.T, user *User, err error) {
+				require.NoError(t, err)
+				require.NotNil(t, user)
+				assert.NotNil(t, user.Metadata)
+				assert.Equal(t, "patient-123", user.Metadata["patient_id"])
+				assert.Equal(t, "patient/*.read", user.Metadata["scopes"])
+			},
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			user, err := NewUser(tt.email, tt.passwordHash, tt.role)
+			user, err := NewUser(tt.email, tt.passwordHash, tt.role, tt.metadata)
 
 			if tt.expectedError != nil {
 				assert.Error(t, err)

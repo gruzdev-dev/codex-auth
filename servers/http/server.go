@@ -35,12 +35,12 @@ func (s *Server) Start() error {
 	// Health check endpoints for Kubernetes
 	router.HandleFunc("/healthz", func(w nethttp.ResponseWriter, r *nethttp.Request) {
 		w.WriteHeader(nethttp.StatusOK)
-		w.Write([]byte("OK"))
+		_, _ = w.Write([]byte("OK"))
 	}).Methods("GET")
 
 	router.HandleFunc("/readyz", func(w nethttp.ResponseWriter, r *nethttp.Request) {
 		w.WriteHeader(nethttp.StatusOK)
-		w.Write([]byte("OK"))
+		_, _ = w.Write([]byte("OK"))
 	}).Methods("GET")
 
 	s.handler.RegisterRoutes(router)

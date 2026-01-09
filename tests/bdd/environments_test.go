@@ -87,14 +87,21 @@ func TestMain(m *testing.M) {
 }
 
 func initSchema(ctx context.Context) {
-	migrationSQL, err := migrations.FS.ReadFile("001_create_users_table.up.sql")
-	if err != nil {
-		log.Fatalf("failed to read migration file: %s", err)
+	migrationFiles := []string{
+		"001_create_users_table.up.sql",
+		"002_add_metadata_column.up.sql",
 	}
 
-	_, err = dbPool.Exec(ctx, string(migrationSQL))
-	if err != nil {
-		log.Fatalf("failed to apply migration: %s", err)
+	for _, migrationFile := range migrationFiles {
+		migrationSQL, err := migrations.FS.ReadFile(migrationFile)
+		if err != nil {
+			log.Fatalf("failed to read migration file %s: %s", migrationFile, err)
+		}
+
+		_, err = dbPool.Exec(ctx, string(migrationSQL))
+		if err != nil {
+			log.Fatalf("failed to apply migration %s: %s", migrationFile, err)
+		}
 	}
 }
 

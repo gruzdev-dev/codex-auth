@@ -28,11 +28,11 @@ const (
 )
 
 type authTestState struct {
-	router           *mux.Router
-	lastResponse     *httptest.ResponseRecorder
-	lastAccessToken  string
-	lastRefreshToken string
-	firstAccessToken string
+	router            *mux.Router
+	lastResponse      *httptest.ResponseRecorder
+	lastAccessToken   string
+	lastRefreshToken  string
+	firstAccessToken  string
 	firstRefreshToken string
 }
 
@@ -41,8 +41,9 @@ func newAuthTestState() *authTestState {
 	hash := hasher.NewBcryptHasher()
 	tokenManager := token.NewJWTManager(secret, tokenTTL)
 	validator := service.NewValidationService()
+	profileProvider := &noopProfileProvider{}
 
-	svc := service.NewUserService(repo, hash, tokenManager, validator)
+	svc := service.NewUserService(repo, hash, tokenManager, validator, profileProvider)
 	handler := authHttp.NewHandler(svc)
 
 	router := mux.NewRouter()

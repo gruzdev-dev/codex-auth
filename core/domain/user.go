@@ -14,6 +14,7 @@ type User struct {
 	Email        string
 	PasswordHash string
 	Role         string
+	Metadata     map[string]string
 	CreatedAt    time.Time
 }
 
@@ -24,7 +25,7 @@ const (
 	MaxPasswordLength = 72
 )
 
-func NewUser(email, passwordHash, role string) (*User, error) {
+func NewUser(email, passwordHash, role string, metadata map[string]string) (*User, error) {
 	email = strings.TrimSpace(email)
 	passwordHash = strings.TrimSpace(passwordHash)
 	role = strings.TrimSpace(role)
@@ -37,11 +38,16 @@ func NewUser(email, passwordHash, role string) (*User, error) {
 		return nil, errors.ErrInvalidRole
 	}
 
+	if metadata == nil {
+		metadata = make(map[string]string)
+	}
+
 	return &User{
 		ID:           uuid.New().String(),
 		Email:        email,
 		PasswordHash: passwordHash,
 		Role:         role,
+		Metadata:     metadata,
 		CreatedAt:    time.Now(),
 	}, nil
 }

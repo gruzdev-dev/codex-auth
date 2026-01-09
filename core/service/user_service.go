@@ -9,22 +9,25 @@ import (
 )
 
 type userService struct {
-	userRepo     ports.UserRepository
-	hasher       ports.PasswordHasher
-	tokenManager ports.TokenManager
-	validator    ports.ValidationService
+	userRepo        ports.UserRepository
+	hasher          ports.PasswordHasher
+	tokenManager    ports.TokenManager
+	validator       ports.ValidationService
+	profileProvider ports.ProfileProvider
 }
 
 func NewUserService(
 	userRepo ports.UserRepository,
 	hasher ports.PasswordHasher,
 	tokenManager ports.TokenManager,
-	validator ports.ValidationService) ports.AuthService {
+	validator ports.ValidationService,
+	profileProvider ports.ProfileProvider) ports.AuthService {
 	return &userService{
-		userRepo:     userRepo,
-		hasher:       hasher,
-		tokenManager: tokenManager,
-		validator:    validator,
+		userRepo:        userRepo,
+		hasher:          hasher,
+		tokenManager:    tokenManager,
+		validator:       validator,
+		profileProvider: profileProvider,
 	}
 }
 
@@ -45,12 +48,17 @@ func (s *userService) Register(ctx context.Context, email, password string) (*do
 		return nil, err
 	}
 
+	metadata, err := s.profileProvider.GetExtraClaims(ctx, email)
+	if err != nil {
+		return nil, err
+	}
+
 	passwordHash, err := s.hasher.Hash(password)
 	if err != nil {
 		return nil, err
 	}
 
-	user, err := domain.NewUser(email, passwordHash, "user")
+	user, err := domain.NewUser(email, passwordHash, "user", metadata)
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +93,7 @@ func (s *userService) Login(ctx context.Context, email, password string) (*domai
 		return nil, errors.ErrInvalidCredentials
 	}
 
-	tokenPair, err := s.tokenManager.NewPair(user.ID, user.Role)
+	tokenPair, err := s.tokenManager.NewPair(user)
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +112,7 @@ func (s *userService) Refresh(ctx context.Context, refreshToken string) (*domain
 		return nil, errors.ErrUserNotFound
 	}
 
-	tokenPair, err := s.tokenManager.NewPair(user.ID, user.Role)
+	tokenPair, err := s.tokenManager.NewPair(user)
 	if err != nil {
 		return nil, err
 	}

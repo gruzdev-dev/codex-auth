@@ -27,7 +27,7 @@ type PasswordHasher interface {
 }
 
 type TokenManager interface {
-	NewPair(userID, role string) (*domain.TokenPair, error)
+	NewPair(user *domain.User) (*domain.TokenPair, error)
 	Parse(accessToken string) (*domain.Claims, error)
 	ValidateRefreshToken(refreshToken string) (string, error)
 }

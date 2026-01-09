@@ -23,15 +23,19 @@ func NewJWTManager(signingKey string, tokenTTL time.Duration) ports.TokenManager
 	}
 }
 
-func (m *JWTManager) NewPair(userID, role string) (*domain.TokenPair, error) {
+func (m *JWTManager) NewPair(user *domain.User) (*domain.TokenPair, error) {
 	now := time.Now()
 
 	accessClaims := jwt.MapClaims{
-		"sub":  userID,
-		"role": role,
+		"sub":  user.ID,
+		"role": user.Role,
 		"exp":  now.Add(m.tokenTTL).Unix(),
 		"iat":  now.Unix(),
-		"jti":  fmt.Sprintf("%s-%d-%d", userID, now.UnixNano(), now.Nanosecond()),
+		"jti":  fmt.Sprintf("%s-%d-%d", user.ID, now.UnixNano(), now.Nanosecond()),
+	}
+
+	for k, v := range user.Metadata {
+		accessClaims[k] = v
 	}
 
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
@@ -41,11 +45,11 @@ func (m *JWTManager) NewPair(userID, role string) (*domain.TokenPair, error) {
 	}
 
 	refreshClaims := jwt.MapClaims{
-		"sub":  userID,
+		"sub":  user.ID,
 		"type": "refresh",
 		"exp":  now.Add(30 * 24 * time.Hour).Unix(),
 		"iat":  now.Unix(),
-		"jti":  fmt.Sprintf("%s-refresh-%d-%d", userID, now.UnixNano(), now.Nanosecond()),
+		"jti":  fmt.Sprintf("%s-refresh-%d-%d", user.ID, now.UnixNano(), now.Nanosecond()),
 	}
 
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
@@ -91,9 +95,19 @@ func (m *JWTManager) Parse(accessToken string) (*domain.Claims, error) {
 		return nil, errors.ErrInvalidToken
 	}
 
+	metadata := make(map[string]string)
+	for k, v := range claims {
+		if k != "sub" && k != "role" && k != "exp" && k != "iat" && k != "jti" {
+			if strVal, ok := v.(string); ok {
+				metadata[k] = strVal
+			}
+		}
+	}
+
 	return &domain.Claims{
-		UserID: userID,
-		Role:   role,
+		UserID:   userID,
+		Role:     role,
+		Metadata: metadata,
 	}, nil
 }
 
