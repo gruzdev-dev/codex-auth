@@ -68,7 +68,7 @@ func BuildContainer() (*dig.Container, error) {
 
 func newDBPool(cfg *configs.Config) (*pgxpool.Pool, error) {
 	ctx := context.Background()
-	pool, err := pgxpool.New(ctx, cfg.DatabaseURL)
+	pool, err := pgxpool.New(ctx, cfg.DatabaseURL())
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +76,7 @@ func newDBPool(cfg *configs.Config) (*pgxpool.Pool, error) {
 }
 
 func newTokenManager(cfg *configs.Config) (ports.TokenManager, error) {
-	return tokenAdapter.NewJWTManager(cfg.JWTSecret, 15*time.Minute), nil
+	return tokenAdapter.NewJWTManager(cfg.Auth.JWTSecret, 15*time.Minute), nil
 }
 
 func newDocumentsClient(cfg *configs.Config) (ports.ProfileProvider, error) {
@@ -84,5 +84,5 @@ func newDocumentsClient(cfg *configs.Config) (ports.ProfileProvider, error) {
 	if err != nil {
 		return nil, err
 	}
-	return documentsAdapter.NewClient(conn, cfg.InternalSecret), nil
+	return documentsAdapter.NewClient(conn, cfg.Auth.InternalSecret), nil
 }

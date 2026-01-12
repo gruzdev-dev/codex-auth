@@ -1,48 +1,65 @@
 package configs
 
 import (
+	"fmt"
 	"os"
-
-	"gopkg.in/yaml.v3"
 )
 
 type Config struct {
-	DatabaseURL      string `yaml:"database_url"`
-	JWTSecret        string `yaml:"jwt_secret"`
-	InternalSecret   string `yaml:"internal_secret"`
+	HTTP struct {
+		Port string
+	}
+	Auth struct {
+		JWTSecret      string
+		InternalSecret string
+	}
+	DB struct {
+		Host     string
+		Port     string
+		User     string
+		Password string
+		Database string
+	}
 	DocumentsService struct {
-		Addr string `yaml:"addr"`
-	} `yaml:"documents_service"`
-	Server struct {
-		Port string `yaml:"port"`
-	} `yaml:"server"`
+		Addr string
+	}
 }
 
 func NewConfig() (*Config, error) {
-	configFile, err := os.ReadFile("config.yaml")
-	if err != nil {
-		return nil, err
-	}
-
 	var cfg Config
-	if err := yaml.Unmarshal(configFile, &cfg); err != nil {
-		return nil, err
-	}
 
-	if envPort := os.Getenv("SERVER_PORT"); envPort != "" {
-		cfg.Server.Port = envPort
-	}
-
-	if envDBURL := os.Getenv("DATABASE_URL"); envDBURL != "" {
-		cfg.DatabaseURL = envDBURL
+	if envPort := os.Getenv("HTTP_PORT"); envPort != "" {
+		cfg.HTTP.Port = envPort
 	}
 
 	if envJWTSecret := os.Getenv("JWT_SECRET"); envJWTSecret != "" {
-		cfg.JWTSecret = envJWTSecret
+		cfg.Auth.JWTSecret = envJWTSecret
 	}
 
 	if envInternalSecret := os.Getenv("INTERNAL_SERVICE_SECRET"); envInternalSecret != "" {
-		cfg.InternalSecret = envInternalSecret
+		cfg.Auth.InternalSecret = envInternalSecret
+	}
+
+	if envDBHost := os.Getenv("POSTGRES_HOST"); envDBHost != "" {
+		cfg.DB.Host = envDBHost
+	}
+
+	if envDBPort := os.Getenv("POSTGRES_PORT"); envDBPort != "" {
+		cfg.DB.Port = envDBPort
+	} else {
+		cfg.DB.Port = "5432"
+	}
+
+	if envDBUser := os.Getenv("POSTGRES_USER"); envDBUser != "" {
+		cfg.DB.User = envDBUser
+	}
+
+	if envDBPassword := os.Getenv("POSTGRES_PASSWORD"); envDBPassword != "" {
+		cfg.DB.Password = envDBPassword
+	}
+
+	if envDBDatabase := os.Getenv("POSTGRES_DB"); envDBDatabase != "" {
+		cfg.DB.Database = envDBDatabase
 	}
 
 	if envDocumentsAddr := os.Getenv("DOCUMENTS_SERVICE_ADDR"); envDocumentsAddr != "" {
@@ -50,4 +67,9 @@ func NewConfig() (*Config, error) {
 	}
 
 	return &cfg, nil
+}
+
+func (c *Config) DatabaseURL() string {
+	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		c.DB.User, c.DB.Password, c.DB.Host, c.DB.Port, c.DB.Database)
 }

@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	"codex-auth/configs"
 	"codex-auth/migrations"
 
 	"github.com/golang-migrate/migrate/v4"
@@ -13,9 +14,14 @@ import (
 )
 
 func main() {
-	databaseURL := os.Getenv("DATABASE_URL")
+	cfg, err := configs.NewConfig()
+	if err != nil {
+		log.Fatalf("Failed to load config: %v", err)
+	}
+
+	databaseURL := cfg.DatabaseURL()
 	if databaseURL == "" {
-		log.Fatal("DATABASE_URL environment variable is required")
+		log.Fatal("Database URL is required")
 	}
 
 	if strings.HasPrefix(databaseURL, "postgres://") {

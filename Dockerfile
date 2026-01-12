@@ -18,6 +18,5 @@ WORKDIR /app
 
 COPY --from=builder /app/main .
 COPY --from=builder /app/migrator .
-COPY --from=builder /app/config.yaml . 
 
 CMD ["./main"]

@@ -46,13 +46,13 @@ func (s *Server) Start() error {
 	s.handler.RegisterRoutes(router)
 
 	srv := &nethttp.Server{
-		Addr:    ":" + s.cfg.Server.Port,
+		Addr:    ":" + s.cfg.HTTP.Port,
 		Handler: router,
 	}
 
 	serverErrors := make(chan error, 1)
 	go func() {
-		log.Printf("Starting server on port %s", s.cfg.Server.Port)
+		log.Printf("Starting server on port %s", s.cfg.HTTP.Port)
 		serverErrors <- srv.ListenAndServe()
 	}()
 
