@@ -15,12 +15,12 @@ import (
 	"github.com/cucumber/godog"
 	"github.com/gorilla/mux"
 
-	"codex-auth/adapters/hasher"
-	authHttp "codex-auth/adapters/http"
-	"codex-auth/adapters/storage/postgres"
-	"codex-auth/adapters/token"
-	"codex-auth/core/ports"
-	"codex-auth/core/service"
+	"github.com/gruzdev-dev/codex-auth/adapters/hasher"
+	authHttp "github.com/gruzdev-dev/codex-auth/adapters/http"
+	"github.com/gruzdev-dev/codex-auth/adapters/storage/postgres"
+	"github.com/gruzdev-dev/codex-auth/adapters/token"
+	"github.com/gruzdev-dev/codex-auth/core/ports"
+	"github.com/gruzdev-dev/codex-auth/core/service"
 )
 
 type performanceTestState struct {

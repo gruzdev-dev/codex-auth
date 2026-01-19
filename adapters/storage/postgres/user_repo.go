@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 
-	"codex-auth/core/domain"
-	coreerrors "codex-auth/core/errors"
-	"codex-auth/core/ports"
+	"github.com/gruzdev-dev/codex-auth/core/domain"
+	coreerrors "github.com/gruzdev-dev/codex-auth/core/errors"
+	"github.com/gruzdev-dev/codex-auth/core/ports"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"

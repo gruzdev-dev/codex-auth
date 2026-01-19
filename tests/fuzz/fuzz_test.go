@@ -8,10 +8,10 @@ import (
 	"strings"
 	"testing"
 
-	"codex-auth/core/domain"
-	coreerrors "codex-auth/core/errors"
-	"codex-auth/core/ports"
-	"codex-auth/core/service"
+	"github.com/gruzdev-dev/codex-auth/core/domain"
+	coreerrors "github.com/gruzdev-dev/codex-auth/core/errors"
+	"github.com/gruzdev-dev/codex-auth/core/ports"
+	"github.com/gruzdev-dev/codex-auth/core/service"
 
 	"go.uber.org/mock/gomock"
 )

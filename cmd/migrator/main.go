@@ -5,8 +5,8 @@ import (
 	"os"
 	"strings"
 
-	"codex-auth/configs"
-	"codex-auth/migrations"
+	"github.com/gruzdev-dev/codex-auth/configs"
+	"github.com/gruzdev-dev/codex-auth/migrations"
 
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/pgx/v5"

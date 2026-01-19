@@ -10,9 +10,10 @@
 package ports
 
 import (
-	domain "codex-auth/core/domain"
 	context "context"
 	reflect "reflect"
+
+	domain "github.com/gruzdev-dev/codex-auth/core/domain"
 
 	gomock "go.uber.org/mock/gomock"
 )

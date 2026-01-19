@@ -4,7 +4,7 @@ import (
 	"strings"
 	"time"
 
-	"codex-auth/core/errors"
+	"github.com/gruzdev-dev/codex-auth/core/errors"
 
 	"github.com/google/uuid"
 )

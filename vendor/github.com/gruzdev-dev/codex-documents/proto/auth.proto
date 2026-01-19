@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package proto;
 
-option go_package = "codex-documents/api/proto";
+option go_package = "github.com/gruzdev-dev/codex-documents/proto";
 
 service AuthIntegration {
   rpc CreatePatient (CreatePatientRequest) returns (CreatePatientResponse);

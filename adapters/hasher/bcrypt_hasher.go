@@ -1,7 +1,7 @@
 package hasher
 
 import (
-	"codex-auth/core/ports"
+	"github.com/gruzdev-dev/codex-auth/core/ports"
 
 	"golang.org/x/crypto/bcrypt"
 )

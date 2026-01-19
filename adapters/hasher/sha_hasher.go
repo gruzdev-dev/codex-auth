@@ -1,13 +1,14 @@
 package hasher
 
 import (
-	"codex-auth/core/ports"
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/gruzdev-dev/codex-auth/core/ports"
 )
 
 type SHA256Hasher struct{}

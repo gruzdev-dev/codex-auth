@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"codex-auth/core/domain"
-	"codex-auth/core/errors"
+	"github.com/gruzdev-dev/codex-auth/core/domain"
+	"github.com/gruzdev-dev/codex-auth/core/errors"
 
 	"github.com/stretchr/testify/assert"
 )

@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	"codex-auth/core/domain"
-	"codex-auth/core/errors"
-	"codex-auth/core/ports"
+	"github.com/gruzdev-dev/codex-auth/core/domain"
+	"github.com/gruzdev-dev/codex-auth/core/errors"
+	"github.com/gruzdev-dev/codex-auth/core/ports"
 
 	"github.com/golang-jwt/jwt/v5"
 )

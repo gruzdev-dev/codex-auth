@@ -1,8 +1,9 @@
 package main
 
 import (
-	"codex-auth/servers/http"
 	"log"
+
+	"github.com/gruzdev-dev/codex-auth/servers/http"
 )
 
 func main() {

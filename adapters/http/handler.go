@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	"codex-auth/core/errors"
-	"codex-auth/core/ports"
+	"github.com/gruzdev-dev/codex-auth/core/errors"
+	"github.com/gruzdev-dev/codex-auth/core/ports"
 
 	"github.com/gorilla/mux"
 )

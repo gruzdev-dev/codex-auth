@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.6
 // 	protoc        v3.21.12
-// source: api/proto/auth.proto
+// source: auth.proto
 
 package proto
 
@@ -30,7 +30,7 @@ type CreatePatientRequest struct {
 
 func (x *CreatePatientRequest) Reset() {
 	*x = CreatePatientRequest{}
-	mi := &file_api_proto_auth_proto_msgTypes[0]
+	mi := &file_auth_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -42,7 +42,7 @@ func (x *CreatePatientRequest) String() string {
 func (*CreatePatientRequest) ProtoMessage() {}
 
 func (x *CreatePatientRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_auth_proto_msgTypes[0]
+	mi := &file_auth_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -55,7 +55,7 @@ func (x *CreatePatientRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreatePatientRequest.ProtoReflect.Descriptor instead.
 func (*CreatePatientRequest) Descriptor() ([]byte, []int) {
-	return file_api_proto_auth_proto_rawDescGZIP(), []int{0}
+	return file_auth_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *CreatePatientRequest) GetEmail() string {
@@ -75,7 +75,7 @@ type CreatePatientResponse struct {
 
 func (x *CreatePatientResponse) Reset() {
 	*x = CreatePatientResponse{}
-	mi := &file_api_proto_auth_proto_msgTypes[1]
+	mi := &file_auth_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -87,7 +87,7 @@ func (x *CreatePatientResponse) String() string {
 func (*CreatePatientResponse) ProtoMessage() {}
 
 func (x *CreatePatientResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_auth_proto_msgTypes[1]
+	mi := &file_auth_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -100,7 +100,7 @@ func (x *CreatePatientResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreatePatientResponse.ProtoReflect.Descriptor instead.
 func (*CreatePatientResponse) Descriptor() ([]byte, []int) {
-	return file_api_proto_auth_proto_rawDescGZIP(), []int{1}
+	return file_auth_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *CreatePatientResponse) GetPatientId() string {
@@ -117,11 +117,12 @@ func (x *CreatePatientResponse) GetScopes() []string {
 	return nil
 }
 
-var File_api_proto_auth_proto protoreflect.FileDescriptor
+var File_auth_proto protoreflect.FileDescriptor
 
-const file_api_proto_auth_proto_rawDesc = "" +
+const file_auth_proto_rawDesc = "" +
 	"\n" +
-	"\x14api/proto/auth.proto\x12\x05proto\",\n" +
+	"\n" +
+	"auth.proto\x12\x05proto\",\n" +
 	"\x14CreatePatientRequest\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\"N\n" +
 	"\x15CreatePatientResponse\x12\x1d\n" +
@@ -129,26 +130,26 @@ const file_api_proto_auth_proto_rawDesc = "" +
 	"patient_id\x18\x01 \x01(\tR\tpatientId\x12\x16\n" +
 	"\x06scopes\x18\x02 \x03(\tR\x06scopes2]\n" +
 	"\x0fAuthIntegration\x12J\n" +
-	"\rCreatePatient\x12\x1b.proto.CreatePatientRequest\x1a\x1c.proto.CreatePatientResponseB\x1bZ\x19codex-documents/api/protob\x06proto3"
+	"\rCreatePatient\x12\x1b.proto.CreatePatientRequest\x1a\x1c.proto.CreatePatientResponseB.Z,github.com/gruzdev-dev/codex-documents/protob\x06proto3"
 
 var (
-	file_api_proto_auth_proto_rawDescOnce sync.Once
-	file_api_proto_auth_proto_rawDescData []byte
+	file_auth_proto_rawDescOnce sync.Once
+	file_auth_proto_rawDescData []byte
 )
 
-func file_api_proto_auth_proto_rawDescGZIP() []byte {
-	file_api_proto_auth_proto_rawDescOnce.Do(func() {
-		file_api_proto_auth_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_api_proto_auth_proto_rawDesc), len(file_api_proto_auth_proto_rawDesc)))
+func file_auth_proto_rawDescGZIP() []byte {
+	file_auth_proto_rawDescOnce.Do(func() {
+		file_auth_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_auth_proto_rawDesc), len(file_auth_proto_rawDesc)))
 	})
-	return file_api_proto_auth_proto_rawDescData
+	return file_auth_proto_rawDescData
 }
 
-var file_api_proto_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
-var file_api_proto_auth_proto_goTypes = []any{
+var file_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_auth_proto_goTypes = []any{
 	(*CreatePatientRequest)(nil),  // 0: proto.CreatePatientRequest
 	(*CreatePatientResponse)(nil), // 1: proto.CreatePatientResponse
 }
-var file_api_proto_auth_proto_depIdxs = []int32{
+var file_auth_proto_depIdxs = []int32{
 	0, // 0: proto.AuthIntegration.CreatePatient:input_type -> proto.CreatePatientRequest
 	1, // 1: proto.AuthIntegration.CreatePatient:output_type -> proto.CreatePatientResponse
 	1, // [1:2] is the sub-list for method output_type
@@ -158,26 +159,26 @@ var file_api_proto_auth_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for field type_name
 }
 
-func init() { file_api_proto_auth_proto_init() }
-func file_api_proto_auth_proto_init() {
-	if File_api_proto_auth_proto != nil {
+func init() { file_auth_proto_init() }
+func file_auth_proto_init() {
+	if File_auth_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_proto_auth_proto_rawDesc), len(file_api_proto_auth_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_auth_proto_rawDesc), len(file_auth_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_api_proto_auth_proto_goTypes,
-		DependencyIndexes: file_api_proto_auth_proto_depIdxs,
-		MessageInfos:      file_api_proto_auth_proto_msgTypes,
+		GoTypes:           file_auth_proto_goTypes,
+		DependencyIndexes: file_auth_proto_depIdxs,
+		MessageInfos:      file_auth_proto_msgTypes,
 	}.Build()
-	File_api_proto_auth_proto = out.File
-	file_api_proto_auth_proto_goTypes = nil
-	file_api_proto_auth_proto_depIdxs = nil
+	File_auth_proto = out.File
+	file_auth_proto_goTypes = nil
+	file_auth_proto_depIdxs = nil
 }

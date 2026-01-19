@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"codex-auth/migrations"
+	"github.com/gruzdev-dev/codex-auth/migrations"
 
 	"github.com/cucumber/godog"
 	"github.com/jackc/pgx/v5/pgxpool"

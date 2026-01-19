@@ -4,8 +4,8 @@ import (
 	"context"
 	"strings"
 
-	"codex-auth/api/proto"
-	"codex-auth/core/ports"
+	"github.com/gruzdev-dev/codex-auth/core/ports"
+	"github.com/gruzdev-dev/codex-documents/proto"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"

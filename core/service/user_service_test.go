@@ -5,9 +5,9 @@ import (
 	"errors"
 	"testing"
 
-	"codex-auth/core/domain"
-	coreerrors "codex-auth/core/errors"
-	"codex-auth/core/ports"
+	"github.com/gruzdev-dev/codex-auth/core/domain"
+	coreerrors "github.com/gruzdev-dev/codex-auth/core/errors"
+	"github.com/gruzdev-dev/codex-auth/core/ports"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

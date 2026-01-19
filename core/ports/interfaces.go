@@ -3,7 +3,7 @@ package ports
 import (
 	"context"
 
-	"codex-auth/core/domain"
+	"github.com/gruzdev-dev/codex-auth/core/domain"
 )
 
 //go:generate mockgen -source=interfaces.go -destination=interfaces_mocks.go -package=ports

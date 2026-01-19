@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"codex-auth/core/errors"
+	"github.com/gruzdev-dev/codex-auth/core/errors"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"

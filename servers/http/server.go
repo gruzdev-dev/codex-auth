@@ -1,9 +1,6 @@
 package http
 
 import (
-	"codex-auth/adapters/http"
-	"codex-auth/configs"
-	middleware "codex-auth/middleware/http"
 	"context"
 	"fmt"
 	"log"
@@ -12,6 +9,10 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/gruzdev-dev/codex-auth/adapters/http"
+	"github.com/gruzdev-dev/codex-auth/configs"
+	middleware "github.com/gruzdev-dev/codex-auth/middleware/http"
 
 	"github.com/gorilla/mux"
 )
