@@ -5,12 +5,11 @@ import (
 
 	"github.com/gruzdev-dev/codex-auth/core/domain"
 	"github.com/gruzdev-dev/codex-auth/core/errors"
-	"github.com/gruzdev-dev/codex-auth/core/ports"
 )
 
 type validationService struct{}
 
-func NewValidationService() ports.ValidationService {
+func NewValidationService() *validationService {
 	return &validationService{}
 }
 

@@ -2,12 +2,15 @@ module github.com/gruzdev-dev/codex-auth
 
 go 1.25.5
 
+replace github.com/gruzdev-dev/codex-auth/proto => ./proto
+
 require (
 	github.com/cucumber/godog v0.15.1
 	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/golang-migrate/migrate/v4 v4.19.1
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1
+	github.com/gruzdev-dev/codex-auth/proto v0.0.0-00010101000000-000000000000
 	github.com/gruzdev-dev/codex-documents/proto v0.0.0-20260118232008-ce5ea3dc104a
 	github.com/jackc/pgx/v5 v5.7.6
 	github.com/stretchr/testify v1.11.1
@@ -16,8 +19,8 @@ require (
 	go.uber.org/dig v1.17.1
 	go.uber.org/mock v0.6.0
 	golang.org/x/crypto v0.45.0
+	golang.org/x/sync v0.18.0
 	google.golang.org/grpc v1.78.0
-	google.golang.org/protobuf v1.36.11
 )
 
 require (
@@ -79,9 +82,9 @@ require (
 	go.opentelemetry.io/otel/metric v1.38.0 // indirect
 	go.opentelemetry.io/otel/trace v1.38.0 // indirect
 	golang.org/x/net v0.47.0 // indirect
-	golang.org/x/sync v0.18.0 // indirect
 	golang.org/x/sys v0.38.0 // indirect
 	golang.org/x/text v0.31.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251029180050-ab9386a59fda // indirect
+	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

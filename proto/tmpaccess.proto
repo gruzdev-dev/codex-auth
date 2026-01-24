@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "github.com/gruzdev-dev/codex-auth/proto";
+
+service TmpAccess {
+    rpc GenerateTmpToken (GenerateTmpTokenRequest) returns (GenerateTmpTokenResponse);
+}
+
+message GenerateTmpTokenRequest {
+    map<string, string> payload = 1;
+    int64 ttl_seconds = 2;
+}
+
+message GenerateTmpTokenResponse {
+    string token = 1;
+}

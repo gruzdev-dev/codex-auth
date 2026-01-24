@@ -5,6 +5,7 @@ import (
 	"time"
 
 	documentsAdapter "github.com/gruzdev-dev/codex-auth/adapters/clients/documents"
+	grpcAdapter "github.com/gruzdev-dev/codex-auth/adapters/grpc"
 	hasherAdapter "github.com/gruzdev-dev/codex-auth/adapters/hasher"
 	httpAdapter "github.com/gruzdev-dev/codex-auth/adapters/http"
 	postgresAdapter "github.com/gruzdev-dev/codex-auth/adapters/storage/postgres"
@@ -12,6 +13,7 @@ import (
 	"github.com/gruzdev-dev/codex-auth/configs"
 	"github.com/gruzdev-dev/codex-auth/core/ports"
 	"github.com/gruzdev-dev/codex-auth/core/service"
+	grpcServer "github.com/gruzdev-dev/codex-auth/servers/grpc"
 	httpServer "github.com/gruzdev-dev/codex-auth/servers/http"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -39,7 +41,7 @@ func BuildContainer() (*dig.Container, error) {
 		return nil, err
 	}
 
-	if err := container.Provide(newTokenManager); err != nil {
+	if err := container.Provide(newTokenManager, dig.As(new(ports.TokenManager), new(ports.TmpTokenManager))); err != nil {
 		return nil, err
 	}
 
@@ -55,11 +57,23 @@ func BuildContainer() (*dig.Container, error) {
 		return nil, err
 	}
 
+	if err := container.Provide(service.NewAccessService, dig.As(new(ports.AccessService))); err != nil {
+		return nil, err
+	}
+
 	if err := container.Provide(httpAdapter.NewHandler); err != nil {
 		return nil, err
 	}
 
 	if err := container.Provide(httpServer.NewServer); err != nil {
+		return nil, err
+	}
+
+	if err := container.Provide(grpcAdapter.NewHandler); err != nil {
+		return nil, err
+	}
+
+	if err := container.Provide(grpcServer.NewServer); err != nil {
 		return nil, err
 	}
 
@@ -75,7 +89,7 @@ func newDBPool(cfg *configs.Config) (*pgxpool.Pool, error) {
 	return pool, nil
 }
 
-func newTokenManager(cfg *configs.Config) (ports.TokenManager, error) {
+func newTokenManager(cfg *configs.Config) (*tokenAdapter.JWTManager, error) {
 	return tokenAdapter.NewJWTManager(cfg.Auth.JWTSecret, 15*time.Minute), nil
 }
 

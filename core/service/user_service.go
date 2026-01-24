@@ -21,7 +21,7 @@ func NewUserService(
 	hasher ports.PasswordHasher,
 	tokenManager ports.TokenManager,
 	validator ports.ValidationService,
-	profileProvider ports.ProfileProvider) ports.AuthService {
+	profileProvider ports.ProfileProvider) *userService {
 	return &userService{
 		userRepo:        userRepo,
 		hasher:          hasher,

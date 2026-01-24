@@ -133,6 +133,9 @@ github.com/google/uuid
 github.com/gorilla/mux
 # github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.3
 ## explicit; go 1.24.0
+# github.com/gruzdev-dev/codex-auth/proto v0.0.0-00010101000000-000000000000 => ./proto
+## explicit; go 1.25.5
+github.com/gruzdev-dev/codex-auth/proto
 # github.com/gruzdev-dev/codex-documents/proto v0.0.0-20260118232008-ce5ea3dc104a
 ## explicit; go 1.25.5
 github.com/gruzdev-dev/codex-documents/proto
@@ -339,6 +342,7 @@ golang.org/x/net/internal/timeseries
 golang.org/x/net/trace
 # golang.org/x/sync v0.18.0
 ## explicit; go 1.24.0
+golang.org/x/sync/errgroup
 golang.org/x/sync/semaphore
 # golang.org/x/sys v0.38.0
 ## explicit; go 1.24.0
@@ -463,3 +467,4 @@ google.golang.org/protobuf/types/known/timestamppb
 # gopkg.in/yaml.v3 v3.0.1
 ## explicit
 gopkg.in/yaml.v3
+# github.com/gruzdev-dev/codex-auth/proto => ./proto

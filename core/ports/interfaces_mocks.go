@@ -14,7 +14,6 @@ import (
 	reflect "reflect"
 
 	domain "github.com/gruzdev-dev/codex-auth/core/domain"
-
 	gomock "go.uber.org/mock/gomock"
 )
 

@@ -1,9 +1,17 @@
 package main
 
 import (
+	"context"
 	"log"
+	"os/signal"
+	"syscall"
 
-	"github.com/gruzdev-dev/codex-auth/servers/http"
+	"golang.org/x/sync/errgroup"
+
+	"github.com/gruzdev-dev/codex-auth/adapters/grpc"
+	"github.com/gruzdev-dev/codex-auth/proto"
+	grpcServer "github.com/gruzdev-dev/codex-auth/servers/grpc"
+	httpServer "github.com/gruzdev-dev/codex-auth/servers/http"
 )
 
 func main() {
@@ -12,9 +20,30 @@ func main() {
 		log.Fatalf("Fatal error building container: %v", err)
 	}
 
-	if err := container.Invoke(func(srv *http.Server) error {
-		return srv.Start()
-	}); err != nil {
-		log.Fatalf("Fatal error running application: %v", err)
+	err = container.Invoke(func(
+		httpSrv *httpServer.Server,
+		grpcSrv *grpcServer.Server,
+		handler *grpc.Handler,
+	) error {
+		proto.RegisterTmpAccessServer(grpcSrv.GetGRPCServer(), handler)
+
+		ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+		defer stop()
+
+		g, ctx := errgroup.WithContext(ctx)
+
+		g.Go(func() error {
+			return httpSrv.Start()
+		})
+
+		g.Go(func() error {
+			return grpcSrv.Start(ctx)
+		})
+
+		return g.Wait()
+	})
+
+	if err != nil {
+		log.Fatalf("Application stopped with error: %v", err)
 	}
 }

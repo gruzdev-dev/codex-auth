@@ -9,6 +9,9 @@ type Config struct {
 	HTTP struct {
 		Port string
 	}
+	GRPC struct {
+		Port string
+	}
 	Auth struct {
 		JWTSecret      string
 		InternalSecret string
@@ -30,6 +33,10 @@ func NewConfig() (*Config, error) {
 
 	if envPort := os.Getenv("HTTP_PORT"); envPort != "" {
 		cfg.HTTP.Port = envPort
+	}
+
+	if envGRPCPort := os.Getenv("GRPC_PORT"); envGRPCPort != "" {
+		cfg.GRPC.Port = envGRPCPort
 	}
 
 	if envJWTSecret := os.Getenv("JWT_SECRET"); envJWTSecret != "" {
