@@ -21,7 +21,7 @@ func NewHandler(service ports.AccessService) *Handler {
 }
 
 func (h *Handler) GenerateTmpToken(ctx context.Context, req *proto.GenerateTmpTokenRequest) (*proto.GenerateTmpTokenResponse, error) {
-	token, err := h.service.GrantTmpAccess(req.Payload, time.Duration(req.TtlSeconds))
+	token, err := h.service.GrantTmpAccess(req.Payload, time.Duration(req.TtlSeconds)*time.Second)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate token: %v", err)
 	}
