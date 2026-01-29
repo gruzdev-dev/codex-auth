@@ -6,6 +6,8 @@ import (
 	"github.com/gruzdev-dev/codex-auth/core/ports"
 )
 
+var _ ports.AccessService = (*accessService)(nil)
+
 type accessService struct {
 	manager ports.TmpTokenManager
 }
@@ -20,6 +22,6 @@ func (s *accessService) GrantTmpAccess(payload map[string]string, ttl time.Durat
 	return s.manager.GenerateTmpToken(payload, ttl)
 }
 
-func (s *accessService) CheckTmpAccess(tmpToken string) error {
+func (s *accessService) CheckTmpToken(tmpToken string) error {
 	return s.manager.ValidateTmpToken(tmpToken)
 }
