@@ -62,7 +62,8 @@ func (t *performanceTestState) iSwitchAlgorithm(algo string) error {
 	validator := service.NewValidationService()
 	profileProvider := &noopProfileProvider{}
 	svc := service.NewUserService(repo, h, tm, validator, profileProvider)
-	handler := authHttp.NewHandler(svc)
+	accessService := service.NewAccessService(tm)
+	handler := authHttp.NewHandler(svc, accessService)
 
 	t.router = mux.NewRouter()
 	handler.RegisterRoutes(t.router)

@@ -44,7 +44,8 @@ func newAuthTestState() *authTestState {
 	profileProvider := &noopProfileProvider{}
 
 	svc := service.NewUserService(repo, hash, tokenManager, validator, profileProvider)
-	handler := authHttp.NewHandler(svc)
+	accessService := service.NewAccessService(tokenManager)
+	handler := authHttp.NewHandler(svc, accessService)
 
 	router := mux.NewRouter()
 	handler.RegisterRoutes(router)

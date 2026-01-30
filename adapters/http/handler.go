@@ -12,12 +12,14 @@ import (
 )
 
 type Handler struct {
-	authService ports.AuthService
+	authService   ports.AuthService
+	accessService ports.AccessService
 }
 
-func NewHandler(authService ports.AuthService) *Handler {
+func NewHandler(authService ports.AuthService, accessService ports.AccessService) *Handler {
 	return &Handler{
-		authService: authService,
+		authService:   authService,
+		accessService: accessService,
 	}
 }
 
@@ -130,14 +132,20 @@ func (h *Handler) Validate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	token := parts[1]
-	claims, err := h.authService.ValidateToken(r.Context(), token)
-	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
+	_, err := h.authService.ValidateToken(r.Context(), token)
+
+	if err == nil {
+		w.WriteHeader(http.StatusOK)
 		return
 	}
 
-	w.Header().Set("X-User-Id", claims.UserID)
-	w.WriteHeader(http.StatusOK)
+	err = h.accessService.CheckTmpToken(token)
+	if err == nil {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	h.writeError(w, http.StatusUnauthorized, "invalid token")
 }
 
 func (h *Handler) writeError(w http.ResponseWriter, statusCode int, message string) {

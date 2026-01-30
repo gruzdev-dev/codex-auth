@@ -36,7 +36,8 @@ func newValidationTestState() *validationTestState {
 	profileProvider := &noopProfileProvider{}
 
 	svc := service.NewUserService(repo, hash, tm, validator, profileProvider)
-	handler := authHttp.NewHandler(svc)
+	accessService := service.NewAccessService(tm)
+	handler := authHttp.NewHandler(svc, accessService)
 
 	router := mux.NewRouter()
 	handler.RegisterRoutes(router)
